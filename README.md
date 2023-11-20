@@ -26,23 +26,10 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
-## Installation
+# Run server
 
 ```bash
-$ npm install
-```
-
-## Running the app
-
-```bash
-# development
 $ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
 ```
 
 ## Test
@@ -58,11 +45,13 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
-## run prettier
+### run prettier
 
 ```bash
-$ prettier . --write
+$ npx prettier . --write
 ```
+
+### create module
 
 ```bash
 $ nest g module cats
