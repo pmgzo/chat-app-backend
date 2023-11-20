@@ -3,10 +3,12 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 
 import { UserModule } from './user/user.module';
+import { MessageModule } from './message/message.module';
 
 @Module({
 	imports: [
 		UserModule,
+		MessageModule,
 		GraphQLModule.forRoot<ApolloDriverConfig>({
 			//include: [UserModule], //(put resolvers module here, to improve compilation time)
 			driver: ApolloDriver,
