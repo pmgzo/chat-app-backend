@@ -1,7 +1,7 @@
 import { Mutation, Query, Resolver, Args } from '@nestjs/graphql';
 import { Message } from './models/message.models';
 import { MessageInput } from './dto/message.input';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Resolver((of) => Message)
 export class MessageResolver {

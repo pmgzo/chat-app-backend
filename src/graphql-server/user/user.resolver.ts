@@ -4,7 +4,7 @@ import { User as PrismaUser } from '@prisma/client';
 
 import { UserCredentialsInput } from './dto/user.input';
 import { AuthentifiedUserToken, User } from './models/user.models';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { getHash, generateSalt } from '../common/hash';
 import { createJwt } from '../common/jwt';
 
@@ -34,6 +34,33 @@ export class UserResolver {
 	}
 
 	@Mutation((returns) => AuthentifiedUserToken)
+	async createUser(
+		@Args('credentials') credentials: UserCredentialsInput,
+	): Promise<AuthentifiedUserToken> {
+		// check if user name is not already taken
+		const userAlreadyCreated = !!(await this.prisma.user.count({
+			where: { name: credentials.name },
+		}));
+		if (userAlreadyCreated) {
+			throw new GraphQLError('User name already exists', {
+				extensions: { code: 'USERNAME_EXISTS' },
+			});
+		}
+		const salt: string = generateSalt();
+		// then create user
+		const createdUser = await this.prisma.user.create({
+			data: {
+				name: credentials.name,
+				salt,
+				password: getHash({ password: credentials.password, salt }),
+			},
+		});
+
+		const token = createJwt({ id: createdUser.id });
+		return { token };
+	}
+
+	@Mutation((returns) => AuthentifiedUserToken)
 	async login(
 		@Args('credentials') credentials: UserCredentialsInput,
 	): Promise<AuthentifiedUserToken> {
@@ -54,32 +81,6 @@ export class UserResolver {
 		}
 		// create jwt
 		const token = createJwt({ id: user.id });
-		return { token };
-	}
-
-	@Mutation((returns) => AuthentifiedUserToken)
-	async createUser(
-		@Args('credentials') credentials: UserCredentialsInput,
-	): Promise<AuthentifiedUserToken> {
-		// check if user name is not already taken
-		const userAlreadyCreated = !!(await this.prisma.user.count({
-			where: { name: credentials.name },
-		}));
-		if (userAlreadyCreated) {
-			throw new GraphQLError('User name already exists', {
-				extensions: { code: 'USERNAME_EXISTS' },
-			});
-		}
-		const salt: string = generateSalt();
-		// // then create user
-		const createdUser = await this.prisma.user.create({
-			data: {
-				name: credentials.name,
-				salt,
-				password: getHash({ password: credentials.password, salt }),
-			},
-		});
-		const token = createJwt({ id: createdUser.id });
 		return { token };
 	}
 }
