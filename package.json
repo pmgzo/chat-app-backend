@@ -17,7 +17,7 @@
 		"test:watch": "jest --watch",
 		"test:cov": "jest --coverage",
 		"test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-		"test:migrate:deb": "dotenv -e .env.test -- npx prisma migrate deploy",
+		"test:migrate:db": "dotenv -e .env.test -- npx prisma migrate deploy",
 		"test:e2e": "dotenv -e .env.test --  jest --config ./test/jest-e2e.json"
 	},
 	"dependencies": {
@@ -31,6 +31,7 @@
 		"dotenv-cli": "^7.3.0",
 		"graphql": "^16.8.1",
 		"jsonwebtoken": "^9.0.2",
+		"parse-duration": "^1.1.0",
 		"reflect-metadata": "^0.1.13",
 		"rxjs": "^7.8.1"
 	},
