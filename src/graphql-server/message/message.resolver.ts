@@ -1,17 +1,19 @@
 import { Mutation, Query, Resolver, Args } from '@nestjs/graphql';
+import { UseGuards } from '@nestjs/common';
 import { Message } from './models/message.models';
 import { MessageInput } from './dto/message.input';
 import { PrismaService } from '../../prisma/prisma.service';
+import { AuthGuard } from '../auth/auth.guards';
 
 @Resolver((of) => Message)
 export class MessageResolver {
 	constructor(private prisma: PrismaService) {}
 
 	@Query((returns) => Message)
+	@UseGuards(AuthGuard)
 	async message(@Args('id') id: number): Promise<Message> {
-		//await checkAccess({token: context.token})
-
 		// check id ?
+
 		return this.prisma.message.findUnique({
 			where: {
 				id: id,
@@ -20,13 +22,11 @@ export class MessageResolver {
 	}
 
 	@Query((returns) => [Message])
+	@UseGuards(AuthGuard)
 	async messages(
-		//@Ctx() context: Context,
 		@Args('senderId') senderId: number,
 		@Args('receiverId') receiverId: number,
 	): Promise<Message[]> {
-		//await checkAccess({ token: context.token });
-
 		// if ids exists ?
 		// check if they are friends
 
@@ -39,13 +39,13 @@ export class MessageResolver {
 	}
 
 	@Mutation((returns) => Message)
+	@UseGuards(AuthGuard)
 	async sendMessage(
 		@Args('messageInput') messageInput: MessageInput,
 	): Promise<Message> {
 		// check if senderId and receiverId exists
 		// check if they are friend ?
 
-		// then create message
 		return this.prisma.message.create({
 			data: {
 				text: messageInput.text,

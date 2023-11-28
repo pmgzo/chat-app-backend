@@ -10,12 +10,11 @@ import { MessageModule } from './message/message.module';
 		UserModule,
 		MessageModule,
 		GraphQLModule.forRoot<ApolloDriverConfig>({
-			//include: [UserModule], //(put resolvers module here, to improve compilation time)
 			driver: ApolloDriver,
 			playground: false,
 			autoSchemaFile: true,
 			sortSchema: true,
-		}),
+		})
 	],
 })
 export class GraphQLServerModule {}

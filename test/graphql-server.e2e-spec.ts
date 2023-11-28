@@ -4,37 +4,37 @@ import * as request from 'supertest';
 import { GraphQLServerModule } from '../src/graphql-server/graphql-server.module';
 import { PrismaModule } from '../src/prisma/prisma.module';
 import { PrismaService } from '../src/prisma/prisma.service';
-
-jest.mock('../src/graphql-server/common/jwt', () => {
-	const originalModule = jest.requireActual('../src/graphql-server/common/jwt');
-
-	return {
-		__esModule: true,
-		...originalModule,
-		createJwt: jest.fn(({ id }: { id: number }) => 'fakeToken'),
-	};
-});
+import { AuthService } from '../src/graphql-server/auth/auth.service';
+import { AUTH_CONFIG } from '../src/graphql-server/auth/contants';
 
 describe('UserResolver (e2e)', () => {
 	let app: INestApplication;
 	let prismaService: PrismaService;
 	const gqlEnpoint = '/graphql';
+	let authService: AuthService;
 
 	beforeAll(async () => {
 		const module = await Test.createTestingModule({
 			providers: [PrismaService],
 		}).compile();
+
 		prismaService = module.get(PrismaService);
 
 		const moduleFixture: TestingModule = await Test.createTestingModule({
+			providers: [{ provide: AUTH_CONFIG, useValue: {tokenExpiresAfter: '1d',
+			pemFileName: 'jwtRS256'}}, AuthService],
 			imports: [GraphQLServerModule, PrismaModule],
 		}).compile();
 
 		app = moduleFixture.createNestApplication();
 		await app.init();
+
+		authService = moduleFixture.get<AuthService>(AuthService);
+
+		authService.createJwt = jest.fn().mockReturnValue('fakeToken');
 	});
 
-	it('create user ', () => {
+	it('create user', () => {
 		const mutationData = {
 			query: `
 			mutation createUserMutation($credentials: UserCredentialsInput!) {
@@ -57,8 +57,34 @@ describe('UserResolver (e2e)', () => {
 			});
 	});
 
+	it.todo('test with wrong authorization token', () => {
+		// Have to use exception filter
+
+		// const queryData = {
+		// 	query: `
+		// 	query queryUser($name: String!) {
+		// 		user(name: $name) {
+		// 			name
+		// 		}
+		// 	}
+		// 	`,
+		// 	operationName: 'queryUser',
+		// 	variables: { name: "user" },
+		// };
+
+		// return request(app.getHttpServer())
+		// 	.post(gqlEnpoint)
+		// 	.set('Apollo-Require-Preflight', 'true')
+		// 	.set('Authorization', 'Bearer wrongToken')
+		// 	.send(queryData)
+		// 	.expect(200)
+		// 	.expect((res) => {
+		// 		console.log(res)
+		// 		expect(res.body.data.user.name).toEqual('fakeToken');
+		// 	});
+	})
+
 	afterAll(async () => {
-		// delete
 		await prismaService.user.deleteMany({});
 		await prismaService.$disconnect();
 	});

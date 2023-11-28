@@ -2,32 +2,31 @@ import { Test } from '@nestjs/testing';
 import { PrismaService } from '../../prisma/prisma.service';
 import { UserResolver } from './user.resolver';
 import { UserCredentialsInput } from './dto/user.input';
-
-jest.mock('../common/jwt', () => {
-	const originalModule = jest.requireActual('../common/jwt');
-
-	return {
-		__esModule: true,
-		...originalModule,
-		createJwt: jest.fn(({ id }: { id: number }) => 'fakeToken'),
-	};
-});
+import { AuthService } from '../auth/auth.service';
+import { AUTH_CONFIG } from '../auth/contants';
+import { UserService } from './user.service';
 
 describe('UserResolver', () => {
 	let userResolver: UserResolver;
 	let prismaService: PrismaService;
+	let authService: AuthService;
 
 	beforeAll(async () => {
 		const module = await Test.createTestingModule({
-			providers: [UserResolver, PrismaService],
+			providers: [{ provide: AUTH_CONFIG, useValue: {tokenExpiresAfter: '1d',
+			pemFileName: 'jwtRS256'}}, AuthService, UserResolver, UserService, PrismaService],
 		}).compile();
 		userResolver = module.get<UserResolver>(UserResolver);
 		prismaService = module.get<PrismaService>(PrismaService);
+		authService = module.get<AuthService>(AuthService);
+
+		authService.createJwt = jest.fn().mockReturnValue('fakeToken')
 	});
 
 	it('should be defined', () => {
 		expect(userResolver).toBeDefined();
 		expect(prismaService).toBeDefined();
+		expect(authService).toBeDefined();
 	});
 
 	it('create and login', async () => {
@@ -36,7 +35,7 @@ describe('UserResolver', () => {
 			password: 'toto',
 		};
 
-		const token1 = await userResolver.createUser(userCredentials); //.then(e => expect())
+		const token1 = await userResolver.createUser(userCredentials);
 
 		expect(token1.token).toEqual('fakeToken');
 
@@ -46,7 +45,6 @@ describe('UserResolver', () => {
 	});
 
 	afterAll(async () => {
-		// delete
 		await prismaService.user.deleteMany({});
 		await prismaService.$disconnect();
 	});
