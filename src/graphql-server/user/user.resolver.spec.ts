@@ -13,14 +13,22 @@ describe('UserResolver', () => {
 
 	beforeAll(async () => {
 		const module = await Test.createTestingModule({
-			providers: [{ provide: AUTH_CONFIG, useValue: {tokenExpiresAfter: '1d',
-			pemFileName: 'jwtRS256'}}, AuthService, UserResolver, UserService, PrismaService],
+			providers: [
+				{
+					provide: AUTH_CONFIG,
+					useValue: { tokenExpiresAfter: '1d', pemFileName: 'jwtRS256' },
+				},
+				AuthService,
+				UserResolver,
+				UserService,
+				PrismaService,
+			],
 		}).compile();
 		userResolver = module.get<UserResolver>(UserResolver);
 		prismaService = module.get<PrismaService>(PrismaService);
 		authService = module.get<AuthService>(AuthService);
 
-		authService.createJwt = jest.fn().mockReturnValue('fakeToken')
+		authService.createJwt = jest.fn().mockReturnValue('fakeToken');
 	});
 
 	it('should be defined', () => {
