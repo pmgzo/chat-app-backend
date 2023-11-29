@@ -46,14 +46,8 @@ export class UserResolver {
 			credentials.password,
 		);
 
-		let token: string
-
-		try {
-			token = this.authService.createJwt({ id: user.id, name: user.name });
-		} catch (error) {
-			throw new UnauthorizedException()
-		}
-		return { token }
+		const token = this.authService.createJwt({ id: user.id, name: user.name });
+		return { token };
 	}
 
 	@Mutation((returns) => AuthentifiedUserToken)
@@ -65,13 +59,7 @@ export class UserResolver {
 			credentials.password,
 		);
 
-		let token: string
-
-		try {
-			token = this.authService.createJwt({ id: user.id, name: user.name });
-		} catch (error) {
-			throw new UnauthorizedException()
-		}
+		const token = this.authService.createJwt({ id: user.id, name: user.name });
 
 		return { token };
 	}

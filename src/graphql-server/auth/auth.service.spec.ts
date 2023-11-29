@@ -10,7 +10,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { JwtPayload } from './interfaces/auth.interfaces';
 import { UserService } from '../user/user.service';
 import { AUTH_CONFIG } from './contants';
-import { UnauthorizedException } from '@nestjs/common';
+import { GraphQLError } from 'graphql';
 
 const createTokenHelper = (payload: JwtPayload): string => {
 	const privateKey = fs.readFileSync(
@@ -32,8 +32,15 @@ describe('AuthService', () => {
 
 	beforeAll(async () => {
 		const moduleRef = await Test.createTestingModule({
-			providers: [{ provide: AUTH_CONFIG, useValue: {tokenExpiresAfter: '1d',
-			pemFileName: 'jwtRS256',}}, AuthService, PrismaService, UserService],
+			providers: [
+				{
+					provide: AUTH_CONFIG,
+					useValue: { tokenExpiresAfter: '1d', pemFileName: 'jwtRS256' },
+				},
+				AuthService,
+				PrismaService,
+				UserService,
+			],
 		}).compile();
 
 		authService = moduleRef.get<AuthService>(AuthService);
@@ -44,9 +51,9 @@ describe('AuthService', () => {
 		fixtureUser = await userService.createUser('user_test', 'test_password');
 	});
 
-    it('should be defined', () => {
+	it('should be defined', () => {
 		expect(authService).toBeDefined();
-        expect(userService).toBeDefined();
+		expect(userService).toBeDefined();
 		expect(prismaService).toBeDefined();
 		expect(authService).toBeDefined();
 	});
@@ -61,14 +68,16 @@ describe('AuthService', () => {
 	});
 
 	it('test with an empty token', async () => {
-		await expect(authService.verifyToken('')).rejects.toThrow(jwt.JsonWebTokenError);
+		await expect(authService.verifyToken('')).rejects.toThrow(GraphQLError);
 	});
 
 	it('test token with different signature', async () => {
 		const wrongToken =
 			'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEiLCJuYW1lIjoiSm9obiBEb2UiLCJpYXQiOjE1MTYyMzkwMjJ9.PecGQGkdLzNwhN6pDtTVM7Bxm4nZ66tBJnSBNvBL9kw';
 
-		await expect(authService.verifyToken(wrongToken)).rejects.toThrow(jwt.JsonWebTokenError);
+		await expect(authService.verifyToken(wrongToken)).rejects.toThrow(
+			GraphQLError,
+		);
 	});
 
 	it('test expired token', async () => {
@@ -85,7 +94,9 @@ describe('AuthService', () => {
 		};
 
 		const expiredToken = createTokenHelper(payload);
-		await expect(authService.verifyToken(expiredToken)).rejects.toThrow(UnauthorizedException);
+		await expect(authService.verifyToken(expiredToken)).rejects.toThrow(
+			new GraphQLError('Token has Expired'),
+		);
 	});
 
 	afterAll(async () => {

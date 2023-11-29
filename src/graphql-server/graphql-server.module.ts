@@ -4,6 +4,7 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 
 import { UserModule } from './user/user.module';
 import { MessageModule } from './message/message.module';
+import { formatError } from './error-masking';
 
 @Module({
 	imports: [
@@ -14,7 +15,8 @@ import { MessageModule } from './message/message.module';
 			playground: false,
 			autoSchemaFile: true,
 			sortSchema: true,
-		})
+			formatError,
+		}),
 	],
 })
 export class GraphQLServerModule {}

@@ -1,8 +1,9 @@
 import * as jwt from 'jsonwebtoken';
-import { Injectable, Inject, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import * as path from 'node:path';
 import * as fs from 'fs';
 import parse from 'parse-duration';
+import { GraphQLError } from 'graphql';
 
 import { AuthConfig, JwtPayload } from './interfaces/auth.interfaces';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -34,19 +35,28 @@ export class AuthService {
 	}
 
 	async verifyToken(token: string): Promise<boolean> {
-		const decodedToken = this.parseJwt({ token });
+		let decodedToken: JwtPayload;
+
+		try {
+			decodedToken = this.parseJwt({ token });
+		} catch (error) {
+			throw new GraphQLError(error.message, {
+				extensions: { code: 'AUTHENTICATION_ERROR' },
+			});
+		}
 
 		if (!(await this.userExists(decodedToken))) {
-			throw new UnauthorizedException();
-			// throw error to say user doesn't exist or
-			// to say unauthenticated (to avoid helping hacker finding pem)
+			throw new GraphQLError("User doesn't exist", {
+				extensions: { code: 'AUTHENTICATION_ERROR' },
+			});
 		}
 
 		const durationLimit = parse(this.options.tokenExpiresAfter);
 
-		if ((decodedToken.iat + durationLimit) < Date.now()) {
-			// need to refresh token
-			throw new UnauthorizedException();
+		if (decodedToken.iat + durationLimit < Date.now()) {
+			throw new GraphQLError('Token has Expired', {
+				extensions: { code: 'INTERNAL_SERVER_ERROR', public: true },
+			});
 		}
 
 		return true;
@@ -64,10 +74,17 @@ export class AuthService {
 			iat: Date.now(),
 		};
 
-		const encodedToken: string = jwt.sign(payload, privateKey, {
-			algorithm: 'RS256',
-		});
+		let encodedToken: string;
 
+		try {
+			encodedToken = jwt.sign(payload, privateKey, {
+				algorithm: 'RS256',
+			});
+		} catch (error) {
+			throw new GraphQLError(error.message, {
+				extensions: { code: 'AUTHENTICATION_ERROR' },
+			});
+		}
 		return encodedToken;
 	}
 }
