@@ -21,8 +21,13 @@ describe('UserResolver (e2e)', () => {
 		prismaService = module.get(PrismaService);
 
 		const moduleFixture: TestingModule = await Test.createTestingModule({
-			providers: [{ provide: AUTH_CONFIG, useValue: {tokenExpiresAfter: '1d',
-			pemFileName: 'jwtRS256'}}, AuthService],
+			providers: [
+				{
+					provide: AUTH_CONFIG,
+					useValue: { tokenExpiresAfter: '1d', pemFileName: 'jwtRS256' },
+				},
+				AuthService,
+			],
 			imports: [GraphQLServerModule, PrismaModule],
 		}).compile();
 
@@ -57,32 +62,64 @@ describe('UserResolver (e2e)', () => {
 			});
 	});
 
-	it.todo('test with wrong authorization token', () => {
-		// Have to use exception filter
+	it('test error masking from db error', () => {
+		const queryData = {
+			query: `
+			query queryUser($name: String!) {
+				user(name: $name) {
+					name
+				}
+			}
+			`,
+			operationName: 'queryUser',
+			variables: { name: 'user' },
+		};
 
-		// const queryData = {
-		// 	query: `
-		// 	query queryUser($name: String!) {
-		// 		user(name: $name) {
-		// 			name
-		// 		}
-		// 	}
-		// 	`,
-		// 	operationName: 'queryUser',
-		// 	variables: { name: "user" },
-		// };
+		return request(app.getHttpServer())
+			.post(gqlEnpoint)
+			.set('Apollo-Require-Preflight', 'true')
+			.set('Authorization', 'Bearer fake token')
+			.send(queryData)
+			.expect(200)
+			.expect((res) => {
+				expect(res.body.errors[0]).toEqual({
+					message: 'Authentication Error',
+					extensions: {
+						code: 'AUTHENTICATION_ERROR',
+					},
+				});
+			});
+	});
 
-		// return request(app.getHttpServer())
-		// 	.post(gqlEnpoint)
-		// 	.set('Apollo-Require-Preflight', 'true')
-		// 	.set('Authorization', 'Bearer wrongToken')
-		// 	.send(queryData)
-		// 	.expect(200)
-		// 	.expect((res) => {
-		// 		console.log(res)
-		// 		expect(res.body.data.user.name).toEqual('fakeToken');
-		// 	});
-	})
+	it('test error masking with requesting unexisting user', () => {
+		authService.verifyToken = jest.fn().mockReturnValueOnce(true);
+
+		const queryData = {
+			query: `
+			query queryUser($name: String!) {
+				user(name: $name) {
+					name
+				}
+			}
+			`,
+			operationName: 'queryUser',
+			variables: { name: 'unexisting user' },
+		};
+
+		return request(app.getHttpServer())
+			.post(gqlEnpoint)
+			.set('Apollo-Require-Preflight', 'true')
+			.set('Authorization', 'Bearer wrongToken')
+			.send(queryData)
+			.expect(200)
+			.expect((res) => {
+				expect(res.body.errors[0]).toEqual({
+					message: 'Internal Server Error',
+					path: ['user'],
+					extensions: { code: 'INTERNAL_SERVER_ERROR' },
+				});
+			});
+	});
 
 	afterAll(async () => {
 		await prismaService.user.deleteMany({});
