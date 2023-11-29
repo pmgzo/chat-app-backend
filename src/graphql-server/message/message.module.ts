@@ -5,9 +5,12 @@ import { AuthModule } from '../auth/auth.module';
 
 @Module({
 	providers: [MessageResolver],
-	imports: [PrismaModule, AuthModule.register({
-		tokenExpiresAfter: '1d',
-		pemFileName: 'jwtRS256',
-	}),],
+	imports: [
+		PrismaModule,
+		AuthModule.register({
+			tokenExpiresAfter: '1d',
+			pemFileName: 'jwtRS256',
+		}),
+	],
 })
 export class MessageModule {}

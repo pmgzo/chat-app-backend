@@ -20,7 +20,6 @@ export class UserService {
 	}
 
 	async userExists(name: string): Promise<boolean> {
-
 		return !!(await this.prismaService.user.count({
 			where: { name: name },
 		}));
