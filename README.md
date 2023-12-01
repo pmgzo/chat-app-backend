@@ -47,7 +47,7 @@ If one of your teamates apply changes
 $ npx prisma migrate dev
 ```
 
-## Miscellanous
+## Miscellaneous
 
 ### Dotenv
 
