@@ -1,0 +1,41 @@
+name: Chat app Backend CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    name: Run tests
+    env:
+      DATABASE_URL: postgresql://postgres:psswd@localhost:6000/postgres
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Gen PEM files
+        run: cd ./src/graphql-server/auth/ ; ./generatePemFile.sh ; cd -
+      - name: Setup node
+        uses: actions/setup-node@v4.0.0
+        with:
+          node-version: 20.2.0
+      - name: Build
+        run: npm install
+      - name: Push Prisma Schema
+        run: npx prisma db push
+      - name: Run tests
+        run: npx jest -i
+      - name: Run e2e tests
+        run: npx jest --config ./test/jest-e2e.json
+  
+    services:
+      postgres:
+        image: docker://postgres:latest
+        env:
+          POSTGRES_PASSWORD: psswd
+        ports:
+          - 6000:5432
+          
+
+    
