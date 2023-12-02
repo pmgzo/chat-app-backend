@@ -20,7 +20,7 @@ export class AuthService {
 
 	private parseJwt({ token }: { token: string }): JwtPayload {
 		const publicKey = fs.readFileSync(
-			path.resolve(__dirname, `./${this.options.pemFileName}.key.pub`),
+			path.resolve(__dirname, `../../../.rsafiles/${this.options.pemFileName}.key.pub`),
 			'utf8',
 		);
 		const decodedToken: JwtPayload = jwt.verify(token, publicKey, {
@@ -64,7 +64,7 @@ export class AuthService {
 
 	createJwt({ id, name }: UserProperties): string {
 		const privateKey = fs.readFileSync(
-			path.resolve(__dirname, `./${this.options.pemFileName}.key`),
+			path.resolve(__dirname, `../../../.rsafiles/${this.options.pemFileName}.key`),
 			'utf8',
 		);
 

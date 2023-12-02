@@ -15,4 +15,4 @@ npx dotenv -e .env.dev -- npx prisma db push
 npx dotenv -e .env.test -- npx prisma db push
 
 # run this script to create the asymetric keys for handling jwt (we could use a secret instead but this is how it is)
-cd ./src/graphql-server/auth/ ; ./generatePemFile.sh
+cd ./.rsafiles/ ; ./generatePemFile.sh
