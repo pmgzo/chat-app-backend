@@ -15,7 +15,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Gen PEM files
-        run: cd ./src/graphql-server/auth/ ; ./generatePemFile.sh ; cd -
+        run: cd ./.rsafiles/ ; ./generatePemFile.sh ; cd -
       - name: Setup node
         uses: actions/setup-node@v4.0.0
         with:
