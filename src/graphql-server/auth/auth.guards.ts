@@ -1,5 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { GraphQLError } from 'graphql';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -8,7 +9,9 @@ export class AuthGuard implements CanActivate {
 		const [, , { req }] = context.getArgs();
 
 		if (!req.headers.authorization) {
-			return false;
+			throw new GraphQLError('Missing authentication token', {
+				extensions: { code: 'AUTHENTICATION_ERROR', public: true },
+			});
 		}
 
 		const token = req.headers.authorization.split(' ')[1];
