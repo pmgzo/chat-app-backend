@@ -16,7 +16,7 @@ describe('UserResolver', () => {
 			providers: [
 				{
 					provide: AUTH_CONFIG,
-					useValue: { tokenExpiresAfter: '1d', pemFileName: 'jwtRS256' },
+					useValue: { tokenExpiresAfter: '1d' },
 				},
 				AuthService,
 				UserResolver,

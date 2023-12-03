@@ -9,7 +9,6 @@ import { AuthModule } from '../auth/auth.module';
 		PrismaModule,
 		AuthModule.register({
 			tokenExpiresAfter: '1d',
-			pemFileName: 'jwtRS256',
 		}),
 	],
 })

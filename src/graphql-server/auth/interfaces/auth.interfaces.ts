@@ -1,6 +1,5 @@
 export interface AuthConfig {
 	tokenExpiresAfter: string; // in string duration format
-	pemFileName: string;
 }
 
 export interface JwtPayload {
