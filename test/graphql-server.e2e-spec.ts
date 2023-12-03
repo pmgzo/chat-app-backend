@@ -24,7 +24,7 @@ describe('UserResolver (e2e)', () => {
 			providers: [
 				{
 					provide: AUTH_CONFIG,
-					useValue: { tokenExpiresAfter: '1d', pemFileName: 'jwtRS256' },
+					useValue: { tokenExpiresAfter: '1d' },
 				},
 				AuthService,
 			],

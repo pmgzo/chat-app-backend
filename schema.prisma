@@ -14,7 +14,8 @@ model User {
   salt      String    @unique
   password  String
 
-  message   Message[]
+  messages   Message[]
+  friendships Friendship[]
 }
 
 model Message {
@@ -26,4 +27,13 @@ model Message {
   createdAt  DateTime @default(now())
   senderId   Int
   receiverId Int
+}
+
+model Friendship {
+  id        Int  @id @default(autoincrement())
+  user      User @relation(fields: [userId], references: [id])
+  userId    Int
+  friendId  Int
+
+  pending Boolean
 }

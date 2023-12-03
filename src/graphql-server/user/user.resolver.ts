@@ -1,12 +1,13 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { GraphQLError } from 'graphql';
-import { UnauthorizedException, UseGuards } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
 
 import { UserCredentialsInput } from './dto/user.input';
 import { UserService } from './user.service';
 import { AuthentifiedUserToken, User } from './models/user.models';
 import { AuthGuard } from '../auth/auth.guards';
 import { AuthService } from '../auth/auth.service';
+import { ContextValueType } from '../graphql-context';
 
 @Resolver((of) => User)
 export class UserResolver {
@@ -25,6 +26,21 @@ export class UserResolver {
 	@UseGuards(AuthGuard)
 	async users(): Promise<User[]> {
 		return this.userService.findUsers();
+	}
+
+	@Mutation((returns) => User)
+	@UseGuards(AuthGuard)
+	async sendFriendRequest(
+		@Context() contextValue: ContextValueType,
+		@Args('friendId') friendId: number,
+	) {
+		// TO DO: handle with subscription
+
+		await this.userService.createFriendship({
+			userId: contextValue.user.id,
+			friendId,
+		});
+		return contextValue.user
 	}
 
 	@Mutation((returns) => AuthentifiedUserToken)
@@ -58,6 +74,8 @@ export class UserResolver {
 			credentials.name,
 			credentials.password,
 		);
+
+		// TODO: have to return wrong username or username, credentials
 
 		const token = this.authService.createJwt({ id: user.id, name: user.name });
 

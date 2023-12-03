@@ -11,6 +11,18 @@ import { AUTH_CONFIG } from './contants';
 
 type UserProperties = Pick<JwtPayload, 'id' | 'name'>;
 
+export const parseJwt = (token: string) => {
+	const publicKey = fs.readFileSync(
+		path.resolve(__dirname, `../../../.rsafiles/jwtRS256.key.pub`),
+		'utf8',
+	);
+	const decodedToken: JwtPayload = jwt.verify(token, publicKey, {
+		algorithm: 'RS256',
+	});
+
+	return decodedToken;
+};
+
 @Injectable()
 export class AuthService {
 	constructor(
@@ -19,15 +31,7 @@ export class AuthService {
 	) {}
 
 	private parseJwt({ token }: { token: string }): JwtPayload {
-		const publicKey = fs.readFileSync(
-			path.resolve(__dirname, `../../../.rsafiles/${this.options.pemFileName}.key.pub`),
-			'utf8',
-		);
-		const decodedToken: JwtPayload = jwt.verify(token, publicKey, {
-			algorithm: 'RS256',
-		});
-
-		return decodedToken;
+		return parseJwt(token);
 	}
 
 	private async userExists({ id, name }: UserProperties): Promise<boolean> {
@@ -64,7 +68,7 @@ export class AuthService {
 
 	createJwt({ id, name }: UserProperties): string {
 		const privateKey = fs.readFileSync(
-			path.resolve(__dirname, `../../../.rsafiles/${this.options.pemFileName}.key`),
+			path.resolve(__dirname, `../../../.rsafiles/jwtRS256.key`),
 			'utf8',
 		);
 

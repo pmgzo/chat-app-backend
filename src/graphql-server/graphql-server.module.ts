@@ -5,6 +5,7 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { UserModule } from './user/user.module';
 import { MessageModule } from './message/message.module';
 import { formatError } from './error-masking';
+import { context } from './graphql-context';
 
 @Module({
 	imports: [
@@ -16,6 +17,7 @@ import { formatError } from './error-masking';
 			autoSchemaFile: true,
 			sortSchema: true,
 			formatError,
+			context,
 		}),
 	],
 })
