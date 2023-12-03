@@ -14,7 +14,7 @@ import { GraphQLError } from 'graphql';
 
 const createTokenHelper = (payload: JwtPayload): string => {
 	const privateKey = fs.readFileSync(
-		path.resolve(__dirname, './jwtRS256.key'),
+		path.resolve(__dirname, '../../../.rsafiles/jwtRS256.key'),
 		'utf8',
 	);
 
