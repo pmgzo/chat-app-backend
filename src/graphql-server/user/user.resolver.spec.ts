@@ -49,7 +49,7 @@ describe('UserResolver', () => {
 
 		const token2 = await userResolver.login(userCredentials);
 
-		expect(token2.token).toEqual('fakeToken');
+		expect(token2.token).toEqual('fakeToken2');
 	});
 
 	afterAll(async () => {
