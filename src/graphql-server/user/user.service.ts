@@ -1,11 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
-import { getHash, generateSalt } from '../common/hash';
+import { getHash, generateSalt } from './utils/hash';
+import { FriendshipService } from './friendship.service';
 
 @Injectable()
-export class UserService {
-	constructor(private prismaService: PrismaService) {}
+export class UserService extends FriendshipService {
+	constructor(protected prismaService: PrismaService) {
+		super(prismaService);
+	}
 
 	async findUser(name: string): Promise<User> {
 		return this.prismaService.user.findUnique({
@@ -31,7 +34,7 @@ export class UserService {
 		return await this.prismaService.user.create({
 			data: {
 				name: name,
-				salt,
+				salt: salt,
 				password: getHash({ password: password, salt }),
 			},
 		});
@@ -49,21 +52,5 @@ export class UserService {
 			throw new Error('Wrong user credentials');
 		}
 		return user;
-	}
-
-	async createFriendship({
-		userId,
-		friendId,
-	}: {
-		userId: number;
-		friendId: number;
-	}) {
-		this.prismaService.friendship.create({
-			data: {
-				userId,
-				friendId,
-				pending: true,
-			},
-		});
 	}
 }
