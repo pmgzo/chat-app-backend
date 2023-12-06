@@ -14,11 +14,6 @@ describe('UserResolver (e2e)', () => {
 	let authService: AuthService;
 
 	beforeAll(async () => {
-		const module = await Test.createTestingModule({
-			providers: [PrismaService],
-		}).compile();
-
-		prismaService = module.get(PrismaService);
 
 		const moduleFixture: TestingModule = await Test.createTestingModule({
 			providers: [
@@ -26,7 +21,6 @@ describe('UserResolver (e2e)', () => {
 					provide: AUTH_CONFIG,
 					useValue: { tokenExpiresAfter: '1d' },
 				},
-				AuthService,
 			],
 			imports: [GraphQLServerModule, PrismaModule],
 		}).compile();
@@ -35,6 +29,7 @@ describe('UserResolver (e2e)', () => {
 		await app.init();
 
 		authService = moduleFixture.get<AuthService>(AuthService);
+		prismaService = moduleFixture.get<PrismaService>(PrismaService);
 
 		authService.createJwt = jest.fn().mockReturnValue('fakeToken');
 	});
@@ -122,6 +117,7 @@ describe('UserResolver (e2e)', () => {
 	});
 
 	afterAll(async () => {
+		await prismaService.friendship.deleteMany({})
 		await prismaService.user.deleteMany({});
 		await prismaService.$disconnect();
 	});
