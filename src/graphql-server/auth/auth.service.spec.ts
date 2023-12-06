@@ -8,7 +8,7 @@ import * as jwt from 'jsonwebtoken';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { JwtPayload } from './interfaces/auth.interfaces';
-import { UserService } from '../user/user.service';
+import { UserService } from '../user/services/user.service';
 import { AUTH_CONFIG } from './contants';
 import { GraphQLError } from 'graphql';
 

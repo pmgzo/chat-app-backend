@@ -1,14 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
-import { PrismaService } from '../../prisma/prisma.service';
-import { getHash, generateSalt } from './utils/hash';
-import { FriendshipService } from './friendship.service';
+import { PrismaService } from '../../../prisma/prisma.service';
+import { getHash, generateSalt } from '../utils/hash';
 
 @Injectable()
-export class UserService extends FriendshipService {
-	constructor(protected prismaService: PrismaService) {
-		super(prismaService);
-	}
+export class UserService {
+	constructor(protected prismaService: PrismaService) {}
 
 	async findUser(name: string): Promise<User> {
 		return this.prismaService.user.findUnique({

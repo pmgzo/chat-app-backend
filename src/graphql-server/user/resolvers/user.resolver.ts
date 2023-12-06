@@ -2,23 +2,18 @@ import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { GraphQLError } from 'graphql';
 import { UseGuards } from '@nestjs/common';
 
-import {
-	UserCredentialsInput,
-} from './dto/user.input';
-import { UserService } from './user.service';
-import { AuthentifiedUserToken, User } from './models/user.models';
-import { AuthGuard } from '../auth/auth.guards';
-import { AuthService } from '../auth/auth.service';
-import { FriendshipResolver } from './friendship.resolver';
+import { UserCredentialsInput } from '../dto/user.input';
+import { UserService } from '../services/user.service';
+import { AuthentifiedUserToken, User } from '../models/user.model';
+import { AuthGuard } from '../../auth/auth.guards';
+import { AuthService } from '../../auth/auth.service';
 
 @Resolver((of) => User)
-export class UserResolver extends FriendshipResolver {
+export class UserResolver {
 	constructor(
-		protected userService: UserService,
+		private userService: UserService,
 		private authService: AuthService,
-	) {
-		super(userService);
-	}
+	) {}
 
 	@Query((returns) => User)
 	@UseGuards(AuthGuard)

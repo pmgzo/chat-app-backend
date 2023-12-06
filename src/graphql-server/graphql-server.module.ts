@@ -4,8 +4,8 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 
 import { UserModule } from './user/user.module';
 import { MessageModule } from './message/message.module';
-import { formatError } from './error-masking';
-import { context } from './graphql-context';
+import { formatError } from './configs/error-masking';
+import { context } from './configs/context';
 
 @Module({
 	imports: [
@@ -13,7 +13,16 @@ import { context } from './graphql-context';
 		MessageModule,
 		GraphQLModule.forRoot<ApolloDriverConfig>({
 			driver: ApolloDriver,
-			playground: false,
+			subscriptions: {
+				'graphql-ws': {
+					onConnect: (ctx) => {
+						console.log("connected")
+						console.log(ctx)
+					},
+					path: '/subscriptions'
+				}
+			},
+			playground: true,
 			autoSchemaFile: true,
 			sortSchema: true,
 			formatError,

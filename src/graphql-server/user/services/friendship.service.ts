@@ -1,6 +1,8 @@
 import { Friendship, User } from '@prisma/client';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '../../../prisma/prisma.service';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 export class FriendshipService {
 	constructor(protected prismaService: PrismaService) {}
 
@@ -39,7 +41,10 @@ export class FriendshipService {
 		});
 	}
 
-	async acceptFriendRequest(friendRequestId: number, friendId: number): Promise<Friendship> {
+	async acceptFriendRequest(
+		friendRequestId: number,
+		friendId: number,
+	): Promise<Friendship> {
 		return this.prismaService.friendship.update({
 			data: {
 				pending: false,
