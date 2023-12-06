@@ -1,10 +1,10 @@
 import { Test } from '@nestjs/testing';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '../../../prisma/prisma.service';
 import { UserResolver } from './user.resolver';
-import { UserCredentialsInput } from './dto/user.input';
-import { AuthService } from '../auth/auth.service';
-import { AUTH_CONFIG } from '../auth/contants';
-import { UserService } from './user.service';
+import { UserCredentialsInput } from '../dto/user.input';
+import { AuthService } from '../../auth/auth.service';
+import { AUTH_CONFIG } from '../../auth/contants';
+import { UserService } from '../services/user.service';
 
 describe('UserResolver', () => {
 	let userResolver: UserResolver;

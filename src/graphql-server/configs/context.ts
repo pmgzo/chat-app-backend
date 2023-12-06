@@ -1,6 +1,6 @@
 import { PrismaClient, User } from '@prisma/client';
-import { JwtPayload } from './auth/interfaces/auth.interfaces';
-import { parseJwt } from './auth/auth.service';
+import { JwtPayload } from '../auth/interfaces/auth.interfaces';
+import { parseJwt } from '../auth/auth.service';
 
 export interface ContextValueType {
 	user: User;

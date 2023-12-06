@@ -1,4 +1,4 @@
-import { Field, Int, ObjectType } from "@nestjs/graphql";
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
 export class Friendship {
@@ -8,9 +8,9 @@ export class Friendship {
 	@Field((type) => Int)
 	userId: number;
 
-    @Field((type) => Int)
+	@Field((type) => Int)
 	friendId: number;
 
-    @Field((type) => Boolean)
-    pending: boolean
+	@Field((type) => Boolean)
+	pending: boolean;
 }
