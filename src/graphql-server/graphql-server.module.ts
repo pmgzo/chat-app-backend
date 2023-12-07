@@ -16,11 +16,10 @@ import { context } from './configs/context';
 			subscriptions: {
 				'graphql-ws': {
 					onConnect: (ctx) => {
-						console.log("connected")
-						console.log(ctx)
+						console.log('connected');
 					},
-					path: '/subscriptions'
-				}
+					path: '/subscriptions',
+				},
 			},
 			playground: true,
 			autoSchemaFile: true,
