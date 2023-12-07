@@ -6,6 +6,7 @@ import { PrismaModule } from '../src/prisma/prisma.module';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { AuthService } from '../src/graphql-server/auth/auth.service';
 import { AUTH_CONFIG } from '../src/graphql-server/auth/contants';
+import { RedisModule } from '../src/graphql-server/redis/redis.module';
 
 describe('UserResolver (e2e)', () => {
 	let app: INestApplication;
@@ -14,7 +15,6 @@ describe('UserResolver (e2e)', () => {
 	let authService: AuthService;
 
 	beforeAll(async () => {
-
 		const moduleFixture: TestingModule = await Test.createTestingModule({
 			providers: [
 				{
@@ -22,7 +22,7 @@ describe('UserResolver (e2e)', () => {
 					useValue: { tokenExpiresAfter: '1d' },
 				},
 			],
-			imports: [GraphQLServerModule, PrismaModule],
+			imports: [GraphQLServerModule, PrismaModule, RedisModule],
 		}).compile();
 
 		app = moduleFixture.createNestApplication();
@@ -117,8 +117,8 @@ describe('UserResolver (e2e)', () => {
 	});
 
 	afterAll(async () => {
-		await prismaService.friendship.deleteMany({})
+		await prismaService.friendship.deleteMany({});
 		await prismaService.user.deleteMany({});
-		await prismaService.$disconnect();
+		await app.close();
 	});
 });

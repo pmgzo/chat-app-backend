@@ -85,7 +85,7 @@ export class FriendshipResolver {
 	}
 
 	@Subscription((returns) => Friendship)
-	friendRequestSent() {
-		this.pubSub.asyncIterator('friend_request_sent');
+	friendRequestSent(): AsyncIterator<Friendship> {
+		return this.pubSub.asyncIterator('friend_request_sent');
 	}
 }
