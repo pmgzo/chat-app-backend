@@ -1,0 +1,13 @@
+services:
+  postgres-test:
+    image: postgres:latest
+    environment:
+      POSTGRES_PASSWORD: dumbypassword
+    ports:
+      - "6000:5432"
+
+  redis-test:
+    image: redis:latest
+    ports:
+      - "7002:6379"
+

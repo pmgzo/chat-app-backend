@@ -39,6 +39,10 @@ jobs:
           POSTGRES_PASSWORD: psswd
         ports:
           - 6000:5432
-          
+
+      redis:
+        image: docker://redis:latest
+        ports:
+          - 7002:6379
 
     

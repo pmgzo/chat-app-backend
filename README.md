@@ -12,7 +12,7 @@ After cloning the repository, install packages
 npm install
 ```
 
-Then run this scripts which will help you run correctly the server and the tests
+Then run this scripts which will help you run correctly the server and the tests (to run only once)
 
 ```bash
 npm run create:envs
@@ -20,11 +20,21 @@ npm run create:envs
 
 ## Run server
 
+Make sure to run `docker compose up -d` for dev environment
+
 ```bash
 $ npm run start
 ```
 
-## Run Tests
+## Tests
+
+Make sure to run `docker compose` for test:
+
+```bash
+$ docker compose --env-file ".env.test" -p chat-app-backend-test up -d
+```
+
+### Run test
 
 ```bash
 ## run integration and unit tests
