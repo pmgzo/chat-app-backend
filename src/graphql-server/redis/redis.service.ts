@@ -7,7 +7,7 @@ export class RedisPubSubEngineService
 	implements OnModuleDestroy
 {
 	constructor() {
-		super({ connection: { port: parseInt(process.env.REDIS_PORT, 10) }})
+		super({ connection: { port: parseInt(process.env.REDIS_PORT, 10) } });
 	}
 	async onModuleDestroy() {
 		await this.close();
