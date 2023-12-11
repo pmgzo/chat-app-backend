@@ -33,7 +33,7 @@ describe('Authentication (e2e)', () => {
 
 		app = moduleFixture.createNestApplication();
 		await app.init();
-		await app.listen(3001);
+		await app.listen(3000);
 
 		userService = moduleFixture.get<UserService>(UserService);
 		friendshipResolver =
@@ -62,7 +62,7 @@ describe('Authentication (e2e)', () => {
 		test('succeed auth in websocket connection', (done) => {
 			client = createClient({
 				webSocketImpl: WebSocket,
-				url: 'ws://localhost:3001/subscriptions',
+				url: 'ws://localhost:3000/subscriptions',
 				connectionParams: { token: `Bearer ${connectionParams.token}` },
 				lazy: false,
 			});
@@ -94,7 +94,7 @@ describe('Authentication (e2e)', () => {
 		test('failed auth, no token was given', (done) => {
 			client = createClient({
 				webSocketImpl: WebSocket,
-				url: 'ws://localhost:3001/subscriptions',
+				url: 'ws://localhost:3000/subscriptions',
 				lazy: false,
 				onNonLazyError: (error) => {
 					client.dispose();
