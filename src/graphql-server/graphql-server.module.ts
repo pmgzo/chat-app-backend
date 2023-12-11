@@ -5,7 +5,8 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { UserModule } from './user/user.module';
 import { MessageModule } from './message/message.module';
 import { formatError } from './configs/error-masking';
-import { context } from './configs/context';
+import { context, onConnect } from './configs/context';
+import { Context } from 'graphql-ws';
 
 @Module({
 	imports: [
@@ -15,9 +16,7 @@ import { context } from './configs/context';
 			driver: ApolloDriver,
 			subscriptions: {
 				'graphql-ws': {
-					onConnect: (ctx) => {
-						console.log('connected');
-					},
+					onConnect,
 					path: '/subscriptions',
 				},
 			},

@@ -1,18 +1,30 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
 import { WebSocket } from 'ws';
 import { GraphQLServerModule } from '../src/graphql-server/graphql-server.module';
 import { PrismaModule } from '../src/prisma/prisma.module';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { AuthService } from '../src/graphql-server/auth/auth.service';
 import { AUTH_CONFIG } from '../src/graphql-server/auth/contants';
-import { createClient, Client, Message, MessageType } from 'graphql-ws';
+import { createClient, Client } from 'graphql-ws';
 import { UserService } from '../src/graphql-server/user/services/user.service';
 import { UserResolver } from '../src/graphql-server/user/resolvers/user.resolver';
 import { User } from '@prisma/client';
 import { FriendshipResolver } from '../src/graphql-server/user/resolvers/friendship.resolver';
 import { RedisModule } from '../src/graphql-server/redis/redis.module';
+
+jest.mock('../src/graphql-server/configs/context', () => {
+	const originalModule = jest.requireActual(
+		'../src/graphql-server/configs/context',
+	);
+
+	return {
+		__esModule: true,
+		...originalModule,
+		// bypass auth for websocketConnection
+		onConnect: jest.fn().mockReturnValue(true),
+	};
+});
 
 describe('Graphql Subscription tests', () => {
 	let app: INestApplication;
@@ -42,10 +54,9 @@ describe('Graphql Subscription tests', () => {
 		await app.init();
 		await app.listen(3000);
 
-		// have to set lazy to false, so that the subscription can occur before the publish
 		client = createClient({
 			webSocketImpl: WebSocket,
-			url: 'ws://localhost:3000/subscriptions' /*, connectionParams*/,
+			url: 'ws://localhost:3000/subscriptions',
 			lazy: false,
 		});
 

@@ -1,19 +1,22 @@
+import { Context } from 'graphql-ws';
 import { PrismaClient, User } from '@prisma/client';
+
 import { JwtPayload } from '../auth/interfaces/auth.interfaces';
 import { parseJwt } from '../auth/auth.service';
 
 export interface ContextValueType {
-	user: User;
+	user: User | null;
 }
 
-export const context = async ({ req, res }): Promise<ContextValueType> => {
-	// this function is called before AuthGuards
-	const prisma = new PrismaClient();
-	let user: User | null = null;
+interface ConnectionParamType extends Record<string, unknown> {
+	token: string;
+}
 
-	// mute all throwing error
+const authUser = async (token: string): Promise<User | null> => {
+	const prisma = new PrismaClient();
+	let user: User;
+
 	try {
-		const token = req.headers.authorization.split(' ')[1];
 		const payload: JwtPayload = parseJwt(token);
 		user = await prisma.user.findUnique({
 			where: {
@@ -21,8 +24,30 @@ export const context = async ({ req, res }): Promise<ContextValueType> => {
 			},
 		});
 	} catch (error) {
-		return { user: null };
+		await prisma.$disconnect();
+		return null;
+	}
+	await prisma.$disconnect();
+	return user;
+};
+
+export const context = async ({ req, res }): Promise<ContextValueType> => {
+	// this function is called before AuthGuards, we let AuthGuards throw instead
+	const token = req?.headers?.authorization?.split(' ')[1] || '';
+
+	return { user: token ? await authUser(token) : null };
+};
+
+export const onConnect = async (
+	ctx: Context<ConnectionParamType, unknown>,
+): Promise<boolean> => {
+	// returning false, return a forbidden error
+	const token = ctx.connectionParams?.token?.split(' ')[-1] || '';
+
+	if (!token) {
+		return false;
 	}
 
-	return { user };
+	const user = await authUser(token);
+	return user ? true : false;
 };
