@@ -7,6 +7,7 @@ export const formatError = (
 	formattedError: GraphQLFormattedError,
 	error: unknown,
 ): GraphQLFormattedError => {
+	// mask every throwing error coming from accessible public resolvers
 	if (
 		formattedError.extensions?.code == 'AUTHENTICATION_ERROR' &&
 		!formattedError.extensions?.public
@@ -20,10 +21,8 @@ export const formatError = (
 	}
 
 	if (formattedError.extensions.public) {
-		return {
-			...formattedError,
-			extensions: { public: undefined },
-		};
+		formattedError.extensions.public = undefined;
+		return formattedError;
 	}
 
 	return {

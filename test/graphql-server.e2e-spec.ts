@@ -30,11 +30,10 @@ describe('UserResolver (e2e)', () => {
 
 		authService = moduleFixture.get<AuthService>(AuthService);
 		prismaService = moduleFixture.get<PrismaService>(PrismaService);
-
-		authService.createJwt = jest.fn().mockReturnValue('fakeToken');
 	});
 
 	it('create user', () => {
+		authService.createJwt = jest.fn().mockReturnValueOnce('fakeToken');
 		const mutationData = {
 			query: `
 			mutation createUserMutation($credentials: UserCredentialsInput!) {
@@ -57,38 +56,38 @@ describe('UserResolver (e2e)', () => {
 			});
 	});
 
-	it('test error masking from db error', () => {
+	it('Error masking from db error at login', () => {
+		const fakeUserName = 'fakeUserName';
+
 		const queryData = {
 			query: `
-			query queryUser($name: String!) {
-				user(name: $name) {
-					name
+			mutation Login($credentials: UserCredentialsInput!) {
+				login(credentials: $credentials) {
+					token
 				}
 			}
 			`,
-			operationName: 'queryUser',
-			variables: { name: 'user' },
+			operationName: 'Login',
+			variables: { credentials: { name: fakeUserName, password: 'password' } },
 		};
 
 		return request(app.getHttpServer())
 			.post(gqlEnpoint)
 			.set('Apollo-Require-Preflight', 'true')
-			.set('Authorization', 'Bearer fake token')
 			.send(queryData)
 			.expect(200)
 			.expect((res) => {
-				expect(res.body.errors[0]).toEqual({
-					message: 'Authentication Error',
-					extensions: {
-						code: 'AUTHENTICATION_ERROR',
-					},
-				});
+				expect(res.body.errors[0].message).toBe(
+					'Wrong username or password provided',
+				);
+				expect(res.body.errors[0].extensions.code).toBe('AUTHENTICATION_ERROR');
 			});
 	});
 
 	it('test error masking with requesting unexisting user', () => {
 		authService.verifyToken = jest.fn().mockReturnValueOnce(true);
 
+		const fakeUsername = 'john';
 		const queryData = {
 			query: `
 			query queryUser($name: String!) {
@@ -98,7 +97,7 @@ describe('UserResolver (e2e)', () => {
 			}
 			`,
 			operationName: 'queryUser',
-			variables: { name: 'unexisting user' },
+			variables: { name: fakeUsername },
 		};
 
 		return request(app.getHttpServer())

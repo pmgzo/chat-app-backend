@@ -54,12 +54,19 @@ export class UserResolver {
 	async login(
 		@Args('credentials') credentials: UserCredentialsInput,
 	): Promise<AuthentifiedUserToken> {
-		const user = await this.userService.verifyCredentials(
-			credentials.name,
-			credentials.password,
-		);
+		let user: User;
 
-		// TODO: case where wrong credentials: have to return wrong username or username, credentials
+		try {
+			user = await this.userService.verifyCredentials(
+				credentials.name,
+				credentials.password,
+			);
+		} catch (error) {
+			throw new GraphQLError('Wrong username or password provided', {
+				extensions: { code: 'AUTHENTICATION_ERROR', public: true },
+			});
+		}
+
 		const token = this.authService.createJwt({ id: user.id, name: user.name });
 
 		return { token };
