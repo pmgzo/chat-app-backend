@@ -42,7 +42,7 @@ export const onConnect = async (
 	ctx: Context<ConnectionParamType, unknown>,
 ): Promise<boolean> => {
 	// returning false, return a forbidden error
-	const token = ctx.connectionParams?.token?.split(' ')[-1] || '';
+	const token = ctx.connectionParams?.token?.split(' ')[1] || '';
 
 	if (!token) {
 		return false;
