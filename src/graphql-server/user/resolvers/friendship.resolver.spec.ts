@@ -1,14 +1,13 @@
-import { Test } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { UserResolver } from './user.resolver';
 import { AuthService } from '../../auth/auth.service';
 import { AUTH_CONFIG } from '../../auth/contants';
 import { UserService } from '../services/user.service';
 import { User } from '@prisma/client';
 import { FriendshipResolver } from './friendship.resolver';
+import { UserModule } from '../user.module';
 
-describe('UserResolver (Friendship)', () => {
-	let userResolver: UserResolver;
+describe('Friendship Resolver', () => {
 	let friendshipResolver: FriendshipResolver;
 	let userService: UserService;
 	let prismaService: PrismaService;
@@ -19,24 +18,26 @@ describe('UserResolver (Friendship)', () => {
 	let mamadou: User;
 	let tom: User;
 
+	let testingModule: TestingModule;
+
 	beforeAll(async () => {
-		const module = await Test.createTestingModule({
+		testingModule = await Test.createTestingModule({
 			providers: [
 				{
 					provide: AUTH_CONFIG,
 					useValue: { tokenExpiresAfter: '1d' },
 				},
 				AuthService,
-				UserResolver,
-				UserService,
 				PrismaService,
 			],
+			imports: [UserModule],
 		}).compile();
-		userResolver = module.get<UserResolver>(UserResolver);
-		userService = module.get<UserService>(UserService);
 
-		prismaService = module.get<PrismaService>(PrismaService);
-		authService = module.get<AuthService>(AuthService);
+		userService = testingModule.get<UserService>(UserService);
+		prismaService = testingModule.get<PrismaService>(PrismaService);
+		authService = testingModule.get<AuthService>(AuthService);
+		friendshipResolver =
+			testingModule.get<FriendshipResolver>(FriendshipResolver);
 
 		kathy = await userService.createUser('Kathy', 'pssd');
 		mamadou = await userService.createUser('Mamadou', 'pssd');
@@ -46,9 +47,9 @@ describe('UserResolver (Friendship)', () => {
 	});
 
 	it('should be defined', () => {
-		expect(userResolver).toBeDefined();
 		expect(prismaService).toBeDefined();
 		expect(authService).toBeDefined();
+		expect(friendshipResolver).toBeDefined();
 	});
 
 	it('accept/refuse friendship', async () => {
@@ -83,9 +84,20 @@ describe('UserResolver (Friendship)', () => {
 		expect(friendList).toHaveLength(0);
 	});
 
+	it('test friendshipRequestSent subscription', async () => {
+		const asyncIterator = friendshipResolver.friendRequestSent(tom.id);
+
+		await Promise.all([
+			friendshipResolver.sendFriendRequest({ user: mamadou }, tom.id),
+			asyncIterator.next(),
+		]).then(([triggeredFuncRes, itRes]) => {
+			expect(triggeredFuncRes.id).toBe(itRes.value.friendRequestSent.id);
+		});
+	});
+
 	afterAll(async () => {
 		await prismaService.friendship.deleteMany({});
 		await prismaService.user.deleteMany({});
-		await prismaService.$disconnect();
+		await testingModule.close();
 	});
 });
