@@ -72,7 +72,10 @@ describe('Graphql Subscription tests', () => {
 
 	it('test with user friend request', async () => {
 		const subscription = client.iterate({
-			query: 'subscription { friendRequestSent { id } }',
+			query:
+				'subscription FriendRequestSent($requesteeId: Int!){ friendRequestSent(requesteeId: $requesteeId) { id } }',
+			operationName: 'FriendRequestSent',
+			variables: { requesteeId: mamadou.id },
 		});
 
 		await Promise.all([

@@ -1,6 +1,7 @@
 import {
 	Args,
 	Context,
+	Int,
 	Mutation,
 	Query,
 	Resolver,
@@ -12,7 +13,7 @@ import { FriendRequestResponseInput } from '../dto/friendship.input';
 import { User } from '../models/user.model';
 import { AuthGuard } from '../../auth/auth.guards';
 import { ContextValueType } from '../../configs/context';
-import { Friendship } from '../models/friendship.model';
+import { Friendship, FriendshipSubscription } from '../models/friendship.model';
 import { RedisPubSubEngineService } from '../../redis/redis.service';
 import { FriendshipService } from '../services/friendship.service';
 
@@ -42,7 +43,7 @@ export class FriendshipResolver {
 			friendId,
 		});
 
-		this.pubSub.publish('friend_request_sent', {
+		this.pubSub.publish(FriendshipSubscription.FriendRequestSent, {
 			friendRequestSent: friendShip,
 		});
 
@@ -84,8 +85,14 @@ export class FriendshipResolver {
 		return true;
 	}
 
-	@Subscription((returns) => Friendship)
-	friendRequestSent(): AsyncIterator<Friendship> {
-		return this.pubSub.asyncIterator('friend_request_sent');
+	@Subscription((returns) => Friendship, {
+		filter: (payload, variables) => {
+			return payload.friendRequestSent.friendId == variables.requesteeId;
+		},
+	})
+	friendRequestSent(
+		@Args('requesteeId', { type: () => Int }) requesteeId: number,
+	): AsyncIterator<IteratorResult<Friendship>> {
+		return this.pubSub.asyncIterator(FriendshipSubscription.FriendRequestSent);
 	}
 }

@@ -14,3 +14,7 @@ export class Friendship {
 	@Field((type) => Boolean)
 	pending: boolean;
 }
+
+export enum FriendshipSubscription {
+	FriendRequestSent = 'friendRequestSent',
+}
