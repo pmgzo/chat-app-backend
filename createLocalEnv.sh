@@ -5,9 +5,9 @@
 echo "DATABASE_URL=\"postgresql://postgres:dumbypassword@localhost:5432/postgres\"\nREDIS_PORT=6379" > .env.dev
 echo "DATABASE_URL=\"postgresql://postgres:dumbypassword@localhost:6000/postgres\"\nREDIS_PORT=7002\nCOMPOSE_FILE=compose-test.yml" > .env.test
 
-# db for local dev
+# setup services for local dev
 docker compose up -d
-# db for tests
+# setup services for tests
 docker compose --env-file ".env.test" -p chat-app-backend-test up -d
 
 # push prisma schema to databases
