@@ -8,14 +8,15 @@ generator client {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  createdAt DateTime  @default(now())
-  name      String    @unique
-  salt      String    @unique
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  name      String   @unique
+  salt      String   @unique
   password  String
 
-  messages   Message[]
+  messages    Message[]
   friendships Friendship[]
+  friends     Friend[]
 }
 
 model Message {
@@ -29,11 +30,22 @@ model Message {
   receiverId Int
 }
 
+model Friend {
+  id       Int  @id @default(autoincrement())
+  friendId Int
+  friend   User @relation(fields: [friendId], references: [id])
+
+  friendshipId Int
+  friendship   Friendship @relation(fields: [friendshipId], references: [id], onDelete: Cascade)
+}
+
 model Friendship {
-  id        Int  @id @default(autoincrement())
-  user      User @relation(fields: [userId], references: [id])
-  userId    Int
-  friendId  Int
+  id Int @id @default(autoincrement())
+
+  peer Friend[]
+
+  requesterId Int
+  requester   User @relation(fields: [requesterId], references: [id])
 
   pending Boolean
 }

@@ -7,43 +7,60 @@ export class FriendshipService {
 	constructor(protected prismaService: PrismaService) {}
 
 	async createFriendship({
-		userId,
-		friendId,
+		requesterId,
+		requesteeId,
 	}: {
-		userId: number;
-		friendId: number;
+		requesterId: number;
+		requesteeId: number;
 	}): Promise<Friendship> {
-		const friend = await this.prismaService.user.findUnique({
-			where: {
-				id: friendId,
-			},
-		});
-
-		if (!friend) {
-			throw new Error("User doesn't exist");
-		}
-
 		return this.prismaService.friendship.create({
 			data: {
-				userId,
-				friendId,
 				pending: true,
+				peer: {
+					create: [
+						{
+							friend: {
+								connect: {
+									id: requesterId,
+								},
+							},
+						},
+						{
+							friend: {
+								connect: {
+									id: requesteeId,
+								},
+							},
+						},
+					],
+				},
+				requester: {
+					connect: {
+						id: requesterId,
+					},
+				},
 			},
-		});
+			select: {
+				id: true,
+				pending: true,
+				requesterId: true,
+				peer: true
+			}
+		})
 	}
 
-	async deleteFriendship(friendRequestId: number, userId: number) {
-		this.prismaService.friendship.delete({
+	async deleteFriendship(friendRequestId: number, deleterId: number) {
+		await this.prismaService.friendship.delete({
 			where: {
 				id: friendRequestId,
-				OR: [{ friendId: userId }, { userId: userId }],
+				AND: {peer: { some: { friendId: deleterId } }}
 			},
 		});
 	}
 
 	async acceptFriendRequest(
 		friendRequestId: number,
-		friendId: number,
+		accepterId: number,
 	): Promise<Friendship> {
 		return this.prismaService.friendship.update({
 			data: {
@@ -51,39 +68,24 @@ export class FriendshipService {
 			},
 			where: {
 				id: friendRequestId,
+				AND: {peer: {
+					some: { friendId: accepterId }
+				}}
 			},
 		});
 	}
 
 	async getFriendList(userId: number): Promise<User[]> {
-		const friendIds = await this.prismaService.friendship
-			.findMany({
-				where: {
-					OR: [
-						{
-							userId,
-							pending: false,
-						},
-						{
-							friendId: userId,
-							pending: false,
-						},
-					],
-				},
-			})
-			.then((users) =>
-				users.map((user) =>
-					user.userId !== userId ? user.userId : user.friendId,
-				),
-			);
-
-		if (!friendIds.length) {
-			return [];
-		}
-
 		return this.prismaService.user.findMany({
 			where: {
-				id: { in: friendIds },
+				NOT: {id: userId},
+				friends: {
+					some: {
+						friendship: {
+							peer: { some: { friendId: userId } },
+						},
+					},
+				},
 			},
 		});
 	}
