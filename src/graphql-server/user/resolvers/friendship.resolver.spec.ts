@@ -53,24 +53,27 @@ describe('Friendship Resolver', () => {
 	});
 
 	it('accept/refuse friendship', async () => {
-		const friendShipReq = await friendshipResolver.sendFriendRequest(
+		const friendshipReq = await friendshipResolver.sendFriendRequest(
 			{ user: kathy },
 			tom.id,
 		);
-		const friendShipReq2 = await friendshipResolver.sendFriendRequest(
+		const friendshipReq2 = await friendshipResolver.sendFriendRequest(
 			{ user: kathy },
 			mamadou.id,
 		);
 
+		expect(friendshipReq.requesterId).toEqual(kathy.id);
+		expect(friendshipReq2.requesterId).toEqual(kathy.id);
+
 		// reject
 		await friendshipResolver.respondToFriendRequest(
 			{ user: tom },
-			{ friendRequestId: friendShipReq.id, accept: false },
+			{ friendRequestId: friendshipReq.id, accept: false },
 		);
 		// accept
 		await friendshipResolver.respondToFriendRequest(
 			{ user: mamadou },
-			{ friendRequestId: friendShipReq2.id, accept: true },
+			{ friendRequestId: friendshipReq2.id, accept: true },
 		);
 
 		// friendList of Kathy

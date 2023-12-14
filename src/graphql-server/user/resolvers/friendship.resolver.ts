@@ -36,17 +36,18 @@ export class FriendshipResolver {
 	@UseGuards(AuthGuard)
 	async sendFriendRequest(
 		@Context() contextValue: ContextValueType,
-		@Args('friendId') friendId: number,
+		@Args('requesteeId') requesteeId: number,
 	): Promise<Friendship> {
 		const friendShip = await this.friendshipService.createFriendship({
-			userId: contextValue.user.id,
-			friendId,
+			requesterId: contextValue.user.id,
+			requesteeId,
 		});
 
 		this.pubSub.publish(FriendshipSubscription.FriendRequestSent, {
 			friendRequestSent: friendShip,
 		});
 
+		// @ts-ignore (doesn't recognize prisma virtual fields)
 		return friendShip;
 	}
 
@@ -86,8 +87,12 @@ export class FriendshipResolver {
 	}
 
 	@Subscription((returns) => Friendship, {
-		filter: (payload, variables) => {
-			return payload.friendRequestSent.friendId == variables.requesteeId;
+		// ideally what do we want is to use the user's context value to get its id
+		// that way, the user can only have access to its notification and not other's
+		filter: (payload, variables, context) => {
+			const { requesteeId } = variables
+			const { requesterId, peer } = payload.friendRequestSent
+			return requesterId != requesteeId && peer.some(({ friendId }) => friendId == requesteeId);
 		},
 	})
 	friendRequestSent(

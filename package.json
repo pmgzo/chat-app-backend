@@ -8,6 +8,7 @@
 	"scripts": {
 		"create:envs": "./createLocalEnv.sh",
 		"build": "nest build",
+		"migrate:db": "dotenv -e .env.dev -- npx prisma db push",
 		"format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
 		"start": "dotenv -e .env.dev -- nest start",
 		"start:dev": "nest start --watch",
