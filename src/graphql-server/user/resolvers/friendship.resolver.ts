@@ -14,7 +14,7 @@ import { User } from '../models/user.model';
 import { AuthGuard } from '../../auth/auth.guards';
 import { ContextValueType } from '../../configs/context';
 import { Friendship, FriendshipSubscription } from '../models/friendship.model';
-import { RedisPubSubEngineService } from '../../redis/redis.service';
+import { RedisPubSubEngineService } from '../../../redis/redis.service';
 import { FriendshipService } from '../services/friendship.service';
 
 @Resolver((of) => Friendship)
@@ -90,9 +90,12 @@ export class FriendshipResolver {
 		// ideally what do we want is to use the user's context value to get its id
 		// that way, the user can only have access to its notification and not other's
 		filter: (payload, variables, context) => {
-			const { requesteeId } = variables
-			const { requesterId, peer } = payload.friendRequestSent
-			return requesterId != requesteeId && peer.some(({ friendId }) => friendId == requesteeId);
+			const { requesteeId } = variables;
+			const { requesterId, peer } = payload.friendRequestSent;
+			return (
+				requesterId != requesteeId &&
+				peer.some(({ friendId }) => friendId == requesteeId)
+			);
 		},
 	})
 	friendRequestSent(

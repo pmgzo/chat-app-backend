@@ -6,14 +6,29 @@ export class Message {
 	id: number;
 
 	@Field()
-	text: string;
-
-	@Field()
 	createdAt: Date;
 
 	@Field()
+	text: string;
+
+	@Field((type) => Int)
 	senderId: number;
 
-	@Field()
+	@Field((type) => Int)
 	receiverId: number;
+}
+
+@ObjectType()
+export class Conversation {
+	@Field((type) => Int)
+	id: number;
+
+	@Field((type) => Int)
+	friendshipId: number;
+
+	@Field((type) => [Message])
+	messages: Message[];
+
+	@Field((type) => Int)
+	count: number;
 }

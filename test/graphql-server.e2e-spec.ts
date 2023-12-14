@@ -6,7 +6,7 @@ import { PrismaModule } from '../src/prisma/prisma.module';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { AuthService } from '../src/graphql-server/auth/auth.service';
 import { AUTH_CONFIG } from '../src/graphql-server/auth/contants';
-import { RedisModule } from '../src/graphql-server/redis/redis.module';
+import { RedisModule } from '../src/redis/redis.module';
 
 describe('UserResolver (e2e)', () => {
 	let app: INestApplication;

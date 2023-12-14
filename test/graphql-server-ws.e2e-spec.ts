@@ -11,7 +11,7 @@ import { UserService } from '../src/graphql-server/user/services/user.service';
 import { UserResolver } from '../src/graphql-server/user/resolvers/user.resolver';
 import { User } from '@prisma/client';
 import { FriendshipResolver } from '../src/graphql-server/user/resolvers/friendship.resolver';
-import { RedisModule } from '../src/graphql-server/redis/redis.module';
+import { RedisModule } from '../src/redis/redis.module';
 
 jest.mock('../src/graphql-server/configs/context', () => {
 	const originalModule = jest.requireActual(

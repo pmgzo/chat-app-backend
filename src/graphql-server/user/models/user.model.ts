@@ -17,3 +17,8 @@ export class AuthentifiedUserToken {
 	@Field()
 	token: string;
 }
+
+export type UserExistArguments =
+	| { name: string }
+	| { id: number }
+	| { name: string; id: number };

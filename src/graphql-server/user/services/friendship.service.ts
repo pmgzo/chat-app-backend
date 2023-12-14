@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class FriendshipService {
-	constructor(protected prismaService: PrismaService) {}
+	constructor(private prismaService: PrismaService) {}
 
 	async createFriendship({
 		requesterId,
@@ -44,16 +44,16 @@ export class FriendshipService {
 				id: true,
 				pending: true,
 				requesterId: true,
-				peer: true
-			}
-		})
+				peer: true,
+			},
+		});
 	}
 
 	async deleteFriendship(friendRequestId: number, deleterId: number) {
 		await this.prismaService.friendship.delete({
 			where: {
 				id: friendRequestId,
-				AND: {peer: { some: { friendId: deleterId } }}
+				AND: { peer: { some: { friendId: deleterId } } },
 			},
 		});
 	}
@@ -68,9 +68,11 @@ export class FriendshipService {
 			},
 			where: {
 				id: friendRequestId,
-				AND: {peer: {
-					some: { friendId: accepterId }
-				}}
+				AND: {
+					peer: {
+						some: { friendId: accepterId },
+					},
+				},
 			},
 		});
 	}
@@ -78,7 +80,7 @@ export class FriendshipService {
 	async getFriendList(userId: number): Promise<User[]> {
 		return this.prismaService.user.findMany({
 			where: {
-				NOT: {id: userId},
+				NOT: { id: userId },
 				friends: {
 					some: {
 						friendship: {
@@ -89,4 +91,15 @@ export class FriendshipService {
 			},
 		});
 	}
+
+	// async areFriends(userId: number, friendId: number): Promise<boolean> {
+	// 	return !!(await this.prismaService.friendship.count({
+	// 		where: {
+	// 			OR: [
+	// 				{ userId, friendId },
+	// 				{ userId: friendId, friendId: userId },
+	// 			],
+	// 		},
+	// 	}));
+	// }
 }

@@ -2,10 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { getHash, generateSalt } from '../utils/hash';
+import { UserExistArguments } from '../models/user.model';
 
 @Injectable()
 export class UserService {
-	constructor(protected prismaService: PrismaService) {}
+	constructor(private prismaService: PrismaService) {}
 
 	async findUser(name: string): Promise<User> {
 		return this.prismaService.user.findUniqueOrThrow({
@@ -19,9 +20,9 @@ export class UserService {
 		return this.prismaService.user.findMany();
 	}
 
-	async userExists(name: string): Promise<boolean> {
+	async userExists(args: UserExistArguments): Promise<boolean> {
 		return !!(await this.prismaService.user.count({
-			where: { name: name },
+			where: { ...args },
 		}));
 	}
 

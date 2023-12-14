@@ -18,7 +18,7 @@ export class Friendship {
 	requesterId: number;
 
 	@Field((type) => [Friend])
-	peer: Friend[]
+	peer: Friend[];
 
 	@Field((type) => Boolean)
 	pending: boolean;

@@ -31,9 +31,9 @@ export class UserResolver {
 	async createUser(
 		@Args('credentials') credentials: UserCredentialsInput,
 	): Promise<AuthentifiedUserToken> {
-		const userAlreadyCreated = await this.userService.userExists(
-			credentials.name,
-		);
+		const userAlreadyCreated = await this.userService.userExists({
+			name: credentials.name,
+		});
 
 		if (userAlreadyCreated) {
 			throw new GraphQLError('User name already exists', {

@@ -5,7 +5,7 @@ import { GraphQLServerModule } from '../src/graphql-server/graphql-server.module
 import { PrismaModule } from '../src/prisma/prisma.module';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { AUTH_CONFIG } from '../src/graphql-server/auth/contants';
-import { RedisModule } from '../src/graphql-server/redis/redis.module';
+import { RedisModule } from '../src/redis/redis.module';
 import { UserResolver } from '../src/graphql-server/user/resolvers/user.resolver';
 import { UserService } from '../src/graphql-server/user/services/user.service';
 import { Client, createClient } from 'graphql-ws';

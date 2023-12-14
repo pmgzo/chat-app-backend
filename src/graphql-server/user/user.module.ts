@@ -3,7 +3,7 @@ import { UserResolver } from './resolvers/user.resolver';
 import { PrismaModule } from '../../prisma/prisma.module';
 import { UserService } from './services/user.service';
 import { AuthModule } from '../auth/auth.module';
-import { RedisModule } from '../redis/redis.module';
+import { RedisModule } from '../../redis/redis.module';
 import { FriendshipResolver } from './resolvers/friendship.resolver';
 import { FriendshipService } from './services/friendship.service';
 
@@ -16,5 +16,6 @@ import { FriendshipService } from './services/friendship.service';
 			tokenExpiresAfter: '1d',
 		}),
 	],
+	exports: [UserService, FriendshipService],
 })
 export class UserModule {}

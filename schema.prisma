@@ -14,20 +14,10 @@ model User {
   salt      String   @unique
   password  String
 
-  messages    Message[]
   friendships Friendship[]
   friends     Friend[]
-}
-
-model Message {
-  id Int @id @default(autoincrement())
-
-  sender User @relation(fields: [senderId], references: [id])
-
-  text       String
-  createdAt  DateTime @default(now())
-  senderId   Int
-  receiverId Int
+  writtenMessages  Message[]    @relation("WrittenMessages")
+  receivedMessages Message[]    @relation("ReceivedMessages")
 }
 
 model Friend {
@@ -48,4 +38,27 @@ model Friendship {
   requester   User @relation(fields: [requesterId], references: [id])
 
   pending Boolean
+  conversation Conversation?
+}
+
+model Conversation {
+  id           Int        @id @default(autoincrement())
+  friendship   Friendship @relation(fields: [friendshipId], references: [id])
+  friendshipId Int        @unique
+
+  messages Message[]
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  text      String
+
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  conversationId Int
+
+  senderId   Int
+  sender     User @relation("WrittenMessages", fields: [senderId], references: [id])
+  receiverId Int
+  receiver   User @relation("ReceivedMessages", fields: [receiverId], references: [id])
 }
