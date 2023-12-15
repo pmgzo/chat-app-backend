@@ -5,6 +5,7 @@ import { AuthModule } from '../auth/auth.module';
 import { MessageService } from './services/message.service';
 import { ConversationService } from './services/conversation.service';
 import { ConversationResolver } from './resolvers/conversation.resolver';
+import { RedisModule } from '../../redis/redis.module';
 
 @Module({
 	providers: [
@@ -15,6 +16,7 @@ import { ConversationResolver } from './resolvers/conversation.resolver';
 	],
 	imports: [
 		PrismaModule,
+		RedisModule,
 		AuthModule.register({
 			tokenExpiresAfter: '1d',
 		}),

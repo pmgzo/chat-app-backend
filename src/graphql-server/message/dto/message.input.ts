@@ -26,3 +26,12 @@ export class MessagesArgs extends PaginationMessagesArgs {
 	@Field((type) => Int)
 	conversationId: number;
 }
+
+@ArgsType()
+export class MessageSubscriptionArgs {
+	@Field((type) => Int)
+	conversationId: number;
+
+	@Field((type) => Int)
+	receiverId: number;
+}

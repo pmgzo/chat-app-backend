@@ -1,16 +1,28 @@
-import { Mutation, Query, Resolver, Args, Context } from '@nestjs/graphql';
+import {
+	Mutation,
+	Query,
+	Resolver,
+	Args,
+	Context,
+	Subscription,
+} from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
-import { Message } from '../models/message.models';
-import { MessageInput, MessagesArgs } from '../dto/message.input';
+import { Message, MessageSubscription } from '../models/message.models';
+import {
+	MessageInput,
+	MessageSubscriptionArgs,
+	MessagesArgs,
+} from '../dto/message.input';
 import { AuthGuard } from '../../auth/auth.guards';
-import { FriendshipService } from '../../user/services/friendship.service';
-import { UserService } from '../../user/services/user.service';
-import { GraphQLError } from 'graphql';
 import { MessageService } from '../services/message.service';
+import { RedisPubSubEngineService } from '../../../redis/redis.service';
 
 @Resolver((of) => Message)
 export class MessageResolver {
-	constructor(private messageService: MessageService) {}
+	constructor(
+		private messageService: MessageService,
+		private pubSub: RedisPubSubEngineService,
+	) {}
 
 	// private async userExists(id: number): Promise<void> {
 	// 	if (!(await this.userService.userExists({ id }))) {
@@ -61,8 +73,24 @@ export class MessageResolver {
 			text,
 		);
 
-		// TODO: subscriptions
+		this.pubSub.publish(MessageSubscription.MessageSent, {
+			messageSent: message,
+		});
 
 		return message;
+	}
+
+	@Subscription((returns) => Message, {
+		filter: (payload, variables, ctx) => {
+			const { conversationId: givenConvId, receiverId: givenReceiverId } = variables;
+			const { conversationId, receiverId } = payload.messageSent;
+			return conversationId === givenConvId && receiverId === givenReceiverId;
+		},
+	})
+	messageSent(
+		@Args() args: MessageSubscriptionArgs,
+	): AsyncIterator<IteratorResult<Message>> {
+		// TODO: maybe check argument consistency, idk how to reject error throw gql ws though
+		return this.pubSub.asyncIterator(MessageSubscription.MessageSent);
 	}
 }

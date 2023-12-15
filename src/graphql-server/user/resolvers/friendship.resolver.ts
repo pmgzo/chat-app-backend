@@ -93,8 +93,8 @@ export class FriendshipResolver {
 			const { requesteeId } = variables;
 			const { requesterId, peer } = payload.friendRequestSent;
 			return (
-				requesterId != requesteeId &&
-				peer.some(({ friendId }) => friendId == requesteeId)
+				requesterId !== requesteeId &&
+				peer.some(({ friendId }) => friendId === requesteeId)
 			);
 		},
 	})

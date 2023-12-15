@@ -35,3 +35,7 @@ export class Conversation {
 	@Field((type) => Int)
 	count: number;
 }
+
+export enum MessageSubscription {
+	MessageSent = 'messageSent',
+}

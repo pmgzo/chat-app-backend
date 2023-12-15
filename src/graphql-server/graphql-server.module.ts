@@ -6,7 +6,6 @@ import { UserModule } from './user/user.module';
 import { MessageModule } from './message/message.module';
 import { formatError } from './configs/error-masking';
 import { context, onConnect } from './configs/context';
-import { Context } from 'graphql-ws';
 
 @Module({
 	imports: [
