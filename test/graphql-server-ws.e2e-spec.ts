@@ -13,6 +13,8 @@ import { RedisModule } from '../src/redis/redis.module';
 import { ConversationService } from '../src/graphql-server/message/services/conversation.service';
 import { MessageResolver } from '../src/graphql-server/message/resolvers/message.resolver';
 
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
+
 jest.mock('../src/graphql-server/configs/context', () => {
 	const originalModule = jest.requireActual(
 		'../src/graphql-server/configs/context',
@@ -83,14 +85,15 @@ describe('Graphql Subscription tests', () => {
 			variables: { requesteeId: mamadou.id },
 		});
 
+		// wait enough to let the client subscribe before the sending message
+		await delay(1000);
+
 		await Promise.all([
 			subscription.next(),
 			friendshipResolver.sendFriendRequest({ user: kathy }, mamadou.id),
 		]).then(([val, val2]) => {
 			expect(val.value.data.friendRequestSent.id).toBe(val2.id);
 		});
-		await client.dispose();
-		client.terminate()
 	});
 
 	it('test with sending message', async () => {
@@ -117,6 +120,9 @@ describe('Graphql Subscription tests', () => {
 			variables:
 				{ conversationId: conversation.id, receiverId: mamadou.id },
 		});
+
+		// wait enough to let the client subscribe before the sending message
+		await delay(1000);
 
 		await Promise.all([
 			subscription.next(),
