@@ -16,6 +16,9 @@ export class Message {
 
 	@Field((type) => Int)
 	receiverId: number;
+
+	@Field((type) => Int)
+	conversationId: number;
 }
 
 @ObjectType()

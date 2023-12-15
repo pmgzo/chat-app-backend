@@ -23,6 +23,6 @@ export class PaginationMessagesArgs {
 
 @ArgsType()
 export class MessagesArgs extends PaginationMessagesArgs {
-	@Field((type) => Int!)
+	@Field((type) => Int)
 	conversationId: number;
 }

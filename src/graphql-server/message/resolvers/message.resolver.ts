@@ -1,8 +1,7 @@
 import { Mutation, Query, Resolver, Args, Context } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
-import { Conversation, Message } from '../models/message.models';
+import { Message } from '../models/message.models';
 import { MessageInput, MessagesArgs } from '../dto/message.input';
-import { PrismaService } from '../../../prisma/prisma.service';
 import { AuthGuard } from '../../auth/auth.guards';
 import { FriendshipService } from '../../user/services/friendship.service';
 import { UserService } from '../../user/services/user.service';
@@ -11,10 +10,7 @@ import { MessageService } from '../services/message.service';
 
 @Resolver((of) => Message)
 export class MessageResolver {
-	constructor(
-		private prisma: PrismaService,
-		private messageService: MessageService,
-	) {}
+	constructor(private messageService: MessageService) {}
 
 	// private async userExists(id: number): Promise<void> {
 	// 	if (!(await this.userService.userExists({ id }))) {
@@ -36,7 +32,7 @@ export class MessageResolver {
 	@UseGuards(AuthGuard)
 	async messages(
 		@Context() ctx,
-		@Args('args', { type: () => MessagesArgs }) args: MessagesArgs,
+		@Args() args: MessagesArgs,
 	): Promise<Message[]> {
 		// checks
 		// await this.userExists(friendId);

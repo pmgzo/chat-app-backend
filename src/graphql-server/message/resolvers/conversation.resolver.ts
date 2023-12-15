@@ -13,7 +13,7 @@ import { ConversationService } from '../services/conversation.service';
 import { MessageService } from '../services/message.service';
 import { PaginationMessagesArgs } from '../dto/message.input';
 
-@Resolver('Conversation')
+@Resolver((of) => Conversation)
 export class ConversationResolver {
 	constructor(
 		private convService: ConversationService,
@@ -41,7 +41,7 @@ export class ConversationResolver {
 	@ResolveField((returns) => [Message])
 	async messages(
 		@Parent() conversation,
-		@Args('args', { type: () => PaginationMessagesArgs, nullable: true })
+		@Args({ nullable: true })
 		args: PaginationMessagesArgs | null,
 	): Promise<Message[]> {
 		const { take, skip } = args || { take: undefined, skip: undefined };
