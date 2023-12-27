@@ -31,11 +31,7 @@ const authUser = async (token: string): Promise<User | null> => {
 	return user;
 };
 
-export const context = async ({
-	req,
-	res,
-	extra,
-}): Promise<ContextValueType> => {
+export const context = async ({ req, res }): Promise<ContextValueType> => {
 	// this function is called before AuthGuards, we let AuthGuards throw instead
 	const token = req?.headers?.authorization?.split(' ')[1] || '';
 
@@ -44,8 +40,8 @@ export const context = async ({
 
 export const onConnect = async (
 	ctx: Context<ConnectionParamType, ContextValueType>,
-): Promise<boolean> => {
-	// returning false, return a forbidden error
+): Promise<boolean | Record<string, unknown>> => {
+	// if returning false, returns a forbidden error
 	const token = ctx.connectionParams?.token?.split(' ')[1] || '';
 
 	if (!token) {
@@ -53,7 +49,7 @@ export const onConnect = async (
 	}
 
 	const user = await authUser(token);
-	ctx.extra = { user };
+	ctx.extra.user = user;
 
 	return user ? true : false;
 };

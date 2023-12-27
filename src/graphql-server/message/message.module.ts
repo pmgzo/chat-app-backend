@@ -6,6 +6,7 @@ import { MessageService } from './services/message.service';
 import { ConversationService } from './services/conversation.service';
 import { ConversationResolver } from './resolvers/conversation.resolver';
 import { RedisModule } from '../../redis/redis.module';
+import { PermissionsModule } from '../../permissions/permissions.module';
 
 @Module({
 	providers: [
@@ -20,6 +21,7 @@ import { RedisModule } from '../../redis/redis.module';
 		AuthModule.register({
 			tokenExpiresAfter: '1d',
 		}),
+		PermissionsModule,
 	],
 })
 export class MessageModule {}
