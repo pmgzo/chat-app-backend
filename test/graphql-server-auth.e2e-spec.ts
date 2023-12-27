@@ -68,10 +68,8 @@ describe('Authentication (e2e)', () => {
 			});
 
 			const subscription = client.iterate({
-				query:
-					'subscription FriendRequestSent($requesteeId: Int!){ friendRequestSent(requesteeId: $requesteeId) { id } }',
+				query: 'subscription FriendRequestSent { friendRequestSent { id } }',
 				operationName: 'FriendRequestSent',
-				variables: { requesteeId: tom.id },
 			});
 
 			// connect takes time, the friendRequest is sent before even then connected finished
@@ -103,7 +101,7 @@ describe('Authentication (e2e)', () => {
 				on: {
 					connected: () => {
 						client.dispose();
-						done(new Error('An error should happened'));
+						done(new Error('No token was provided, an error should happened'));
 					},
 				},
 				retryAttempts: 0,

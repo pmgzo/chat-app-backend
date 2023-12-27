@@ -87,17 +87,6 @@ describe('Friendship Resolver', () => {
 		expect(friendList).toHaveLength(0);
 	});
 
-	it('test friendshipRequestSent subscription', async () => {
-		const asyncIterator = friendshipResolver.friendRequestSent(tom.id);
-
-		await Promise.all([
-			friendshipResolver.sendFriendRequest({ user: mamadou }, tom.id),
-			asyncIterator.next(),
-		]).then(([triggeredFuncRes, itRes]) => {
-			expect(triggeredFuncRes.id).toBe(itRes.value.friendRequestSent.id);
-		});
-	});
-
 	afterAll(async () => {
 		await prismaService.friendship.deleteMany({});
 		await prismaService.user.deleteMany({});

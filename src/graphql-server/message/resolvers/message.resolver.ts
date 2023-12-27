@@ -16,12 +16,15 @@ import {
 import { AuthGuard } from '../../auth/auth.guards';
 import { MessageService } from '../services/message.service';
 import { RedisPubSubEngineService } from '../../../redis/redis.service';
+import { GraphQLError } from 'graphql/error';
+import { PermissionsService } from '../../../permissions/permissions.service';
 
 @Resolver((of) => Message)
 export class MessageResolver {
 	constructor(
 		private messageService: MessageService,
 		private pubSub: RedisPubSubEngineService,
+		private permissionService: PermissionsService,
 	) {}
 
 	// private async userExists(id: number): Promise<void> {
@@ -82,15 +85,25 @@ export class MessageResolver {
 
 	@Subscription((returns) => Message, {
 		filter: (payload, variables, ctx) => {
-			const { conversationId: givenConvId, receiverId: givenReceiverId } = variables;
+			const { conversationId: givenConvId, receiverId: givenReceiverId } =
+				variables;
 			const { conversationId, receiverId } = payload.messageSent;
 			return conversationId === givenConvId && receiverId === givenReceiverId;
 		},
 	})
-	messageSent(
+	async messageSent(
+		@Context() ctx,
 		@Args() args: MessageSubscriptionArgs,
-	): AsyncIterator<IteratorResult<Message>> {
-		// TODO: maybe check argument consistency, idk how to reject error throw gql ws though
-		return this.pubSub.asyncIterator(MessageSubscription.MessageSent);
+	): Promise<AsyncIterator<IteratorResult<Message>>> {
+		return this.permissionService
+			.haveAccessToThisConv(args.conversationId, ctx.req.extra.user.id)
+			.then((result) => {
+				if (!result) {
+					throw new GraphQLError("Subscribe to other's events is forbidden", {
+						extensions: { code: 'PERMISSIONS_ERROR', public: true },
+					});
+				}
+				return this.pubSub.asyncIterator(MessageSubscription.MessageSent);
+			});
 	}
 }

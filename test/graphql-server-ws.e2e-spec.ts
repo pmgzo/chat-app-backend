@@ -12,27 +12,19 @@ import { FriendshipResolver } from '../src/graphql-server/user/resolvers/friends
 import { RedisModule } from '../src/redis/redis.module';
 import { ConversationService } from '../src/graphql-server/message/services/conversation.service';
 import { MessageResolver } from '../src/graphql-server/message/resolvers/message.resolver';
+import { ConversationResolver } from '../src/graphql-server/message/resolvers/conversation.resolver';
+import { UserResolver } from '../src/graphql-server/user/resolvers/user.resolver';
 
-const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
-
-jest.mock('../src/graphql-server/configs/context', () => {
-	const originalModule = jest.requireActual(
-		'../src/graphql-server/configs/context',
-	);
-
-	return {
-		__esModule: true,
-		...originalModule,
-		// bypass auth for websocketConnection
-		onConnect: jest.fn().mockReturnValue(true),
-	};
-});
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 describe('Graphql Subscription tests', () => {
 	let app: INestApplication;
+	let moduleFixture: TestingModule;
+
 	let prismaService: PrismaService;
-	let userService: UserService;
 	let conversationService: ConversationService;
+
+	let userResolver: UserResolver;
 	let friendshipResolver: FriendshipResolver;
 	let messageResolver: MessageResolver;
 
@@ -42,7 +34,7 @@ describe('Graphql Subscription tests', () => {
 	let mamadou: User;
 
 	beforeAll(async () => {
-		const moduleFixture: TestingModule = await Test.createTestingModule({
+		moduleFixture = await Test.createTestingModule({
 			providers: [
 				{
 					provide: AUTH_CONFIG,
@@ -58,102 +50,210 @@ describe('Graphql Subscription tests', () => {
 		await app.listen(3000);
 
 		prismaService = moduleFixture.get<PrismaService>(PrismaService);
-		userService = moduleFixture.get<UserService>(UserService);
+		userResolver = moduleFixture.get<UserResolver>(UserResolver);
+
 		conversationService =
 			moduleFixture.get<ConversationService>(ConversationService);
 		friendshipResolver =
 			moduleFixture.get<FriendshipResolver>(FriendshipResolver);
 		messageResolver = moduleFixture.get<MessageResolver>(MessageResolver);
 
+		const userService = moduleFixture.get<UserService>(UserService);
 		kathy = await userService.createUser('Kathy', 'pssd');
 		mamadou = await userService.createUser('Mamadou', 'pssd');
 	});
 
-	beforeEach(() => {
-		client = createClient({
-			webSocketImpl: WebSocket,
-			url: 'ws://localhost:3000/subscriptions',
-			lazy: false,
-		});
-	})
-
-	it('test with user friend request', async () => {
-		const subscription = client.iterate({
-			query:
-				'subscription FriendRequestSent($requesteeId: Int!){ friendRequestSent(requesteeId: $requesteeId) { id } }',
-			operationName: 'FriendRequestSent',
-			variables: { requesteeId: mamadou.id },
-		});
-
-		// wait enough to let the client subscribe before the sending message
-		await delay(1000);
-
-		await Promise.all([
-			subscription.next(),
-			friendshipResolver.sendFriendRequest({ user: kathy }, mamadou.id),
-		]).then(([val, val2]) => {
-			expect(val.value.data.friendRequestSent.id).toBe(val2.id);
-		});
-	});
-
-	it('test with sending message', async () => {
-		// create friendship
-		const fReq = await friendshipResolver.sendFriendRequest(
-			{ user: kathy },
-			mamadou.id,
-		);
-		await friendshipResolver.respondToFriendRequest(
-			{ user: mamadou },
-			{ friendRequestId: fReq.id, accept: true },
-		);
-
-		// create conv
-		const conversation = await conversationService.createConversation(
-			fReq.id,
-			mamadou.id,
-		);
-
-		// subscribe to receiving message from this conv
-		const subscription = client.iterate({
-			query:
-				'subscription MessageSent($conversationId: Int!, $receiverId: Int!){ messageSent(conversationId: $conversationId, receiverId: $receiverId) { id, conversationId, text } }',
-			variables:
-				{ conversationId: conversation.id, receiverId: mamadou.id },
-		});
-
-		// wait enough to let the client subscribe before the sending message
-		await delay(1000);
-
-		await Promise.all([
-			subscription.next(),
-			messageResolver.sendMessage(
-				{ user: kathy },
-				{ text: 'Hi', receiverId: mamadou.id, conversationId: conversation.id },
-			),
-		]).then(([val, val2]) => {
-			expect(val.value.data.messageSent.id).toBe(val2.id);
-			expect(val.value.data.messageSent.conversationId).toBe(
-				val2.conversationId,
-			);
-			expect(val.value.data.messageSent.conversationId).toBe(
-				val2.conversationId,
-			);
-			expect(val.value.data.messageSent.text).toBe(
-				val2.text,
-			);
-		});
-		
-	});
-
 	afterEach(async () => {
-		await client.dispose();
-		client.terminate();
-	})
-
-	afterAll(async () => {
 		await prismaService.message.deleteMany({});
 		await prismaService.conversation.deleteMany({});
 		await prismaService.friendship.deleteMany({});
+	});
+
+	it('should be defined', () => {
+		expect(prismaService).toBeDefined();
+		expect(conversationService).toBeDefined();
+
+		expect(friendshipResolver).toBeDefined();
+		expect(messageResolver).toBeDefined();
+	});
+
+	describe('test with subscription with conversation and message', () => {
+		// here we only one standard client which is mamadou here
+
+		beforeEach(async () => {
+			const userResolver = moduleFixture.get<UserResolver>(UserResolver);
+
+			const tokenObj = await userResolver.login({
+				name: 'Mamadou',
+				password: 'pssd',
+			});
+
+			client = createClient({
+				webSocketImpl: WebSocket,
+				url: 'ws://localhost:3000/subscriptions',
+				connectionParams: { token: `Bearer ${tokenObj.token}` },
+				lazy: false,
+			});
+		});
+
+		it('sending friend request', async () => {
+			const subscription = client.iterate({
+				query: 'subscription FriendReq {friendRequestSent { id }}',
+				operationName: 'FriendReq',
+			});
+
+			// wait enough to let the client subscribe before the sending message
+			await delay(500);
+
+			await Promise.all([
+				subscription.next(),
+				friendshipResolver.sendFriendRequest({ user: kathy }, mamadou.id),
+			]).then(([friendRequestSub, friendReqMutation]) => {
+				expect(friendRequestSub.value.data.friendRequestSent.id).toBe(
+					friendReqMutation.id,
+				);
+			});
+		});
+
+		it('sending message', async () => {
+			// create friendship
+			const fReq = await friendshipResolver.sendFriendRequest(
+				{ user: kathy },
+				mamadou.id,
+			);
+			await friendshipResolver.respondToFriendRequest(
+				{ user: mamadou },
+				{ friendRequestId: fReq.id, accept: true },
+			);
+
+			// create conv
+			const conversation = await conversationService.createConversation(
+				fReq.id,
+				mamadou.id,
+			);
+
+			// subscribe to receiving message from this conv
+			const subscription = client.iterate({
+				query:
+					'subscription MessageSent($conversationId: Int!, $receiverId: Int!){ messageSent(conversationId: $conversationId, receiverId: $receiverId) { id, conversationId, text } }',
+				variables: { conversationId: conversation.id, receiverId: mamadou.id },
+			});
+
+			// wait enough to let the client subscribe before the sending message
+			await delay(500);
+
+			await Promise.all([
+				subscription.next(),
+				messageResolver.sendMessage(
+					{ user: kathy },
+					{
+						text: 'Hi',
+						receiverId: mamadou.id,
+						conversationId: conversation.id,
+					},
+				),
+			]).then(([receivedMessageSub, sendMessageMut]) => {
+				expect(receivedMessageSub.value.data.messageSent.id).toBe(
+					sendMessageMut.id,
+				);
+				expect(receivedMessageSub.value.data.messageSent.conversationId).toBe(
+					sendMessageMut.conversationId,
+				);
+				expect(receivedMessageSub.value.data.messageSent.conversationId).toBe(
+					sendMessageMut.conversationId,
+				);
+				expect(receivedMessageSub.value.data.messageSent.text).toBe(
+					sendMessageMut.text,
+				);
+			});
+		});
+
+		afterEach(async () => {
+			await client.dispose();
+			client.terminate();
+		});
+	});
+
+	describe('tests subscription permissions', () => {
+		let tom: User;
+
+		beforeAll(async () => {
+			// create a tier person to check rights
+			const userService = moduleFixture.get<UserService>(UserService);
+			tom = await userService.createUser('Tom', 'pssd');
+		});
+
+		it("another user cannot subscribe to a conversation that she/he doesn't belong to", (done) => {
+			const conversationResolver =
+				moduleFixture.get<ConversationResolver>(ConversationResolver);
+			const userResolver = moduleFixture.get<UserResolver>(UserResolver);
+
+			// tom and mamadou become friend, and tom has started a conversation with him
+			friendshipResolver
+				.sendFriendRequest({ user: tom }, mamadou.id)
+				.then((fReq) => {
+					friendshipResolver
+						.respondToFriendRequest(
+							{ user: mamadou },
+							{ friendRequestId: fReq.id, accept: true },
+						)
+						.then(() => {
+							conversationResolver
+								.createConversation({ user: tom }, fReq.id)
+								.then((conversation) => {
+									// kathy logs in and subscribes to a conversation that she shouldn't have access
+									userResolver
+										.login({
+											name: 'Kathy',
+											password: 'pssd',
+										})
+										.then((tokenObj) => {
+											client = createClient({
+												webSocketImpl: WebSocket,
+												url: 'ws://localhost:3000/subscriptions',
+												connectionParams: { token: `Bearer ${tokenObj.token}` },
+												lazy: false,
+											});
+
+											client.on('message', (message) => {
+												if (message.type === 'next' && message.payload) {
+													expect(
+														message.payload.errors[0].extensions.code,
+													).toBe('PERMISSIONS_ERROR');
+													done();
+												}
+												if (
+													message.type === 'next' &&
+													message.payload &&
+													!message.payload.errors
+												) {
+													done(
+														new Error('Should have a permissions error here !'),
+													);
+												}
+											});
+
+											const subscription = client.iterate({
+												query:
+													'subscription MessageSent($conversationId: Int!, $receiverId: Int!){ messageSent(conversationId: $conversationId, receiverId: $receiverId) { id, conversationId, text } }',
+												variables: {
+													conversationId: conversation.id,
+													receiverId: kathy.id,
+												},
+											});
+										});
+								});
+						});
+				});
+		});
+
+		afterEach(async () => {
+			await client.dispose();
+			client.terminate();
+		});
+	});
+
+	afterAll(async () => {
 		await prismaService.user.deleteMany({});
 		await app.close();
 	});
