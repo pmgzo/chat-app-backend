@@ -1,6 +1,7 @@
 import {
 	Args,
 	Context,
+	Int,
 	Mutation,
 	Query,
 	Resolver,
@@ -12,7 +13,11 @@ import { FriendRequestResponseInput } from '../dto/friendship.input';
 import { User } from '../models/user.model';
 import { AuthGuard } from '../../auth/auth.guards';
 import { ContextValueType } from '../../configs/context';
-import { Friendship, FriendshipSubscription } from '../models/friendship.model';
+import {
+	Friend,
+	Friendship,
+	FriendshipSubscription,
+} from '../models/friendship.model';
 import { RedisPubSubEngineService } from '../../../redis/redis.service';
 import { FriendshipService } from '../services/friendship.service';
 
@@ -23,20 +28,38 @@ export class FriendshipResolver {
 		private pubSub: RedisPubSubEngineService,
 	) {}
 
-	@Query((returns) => [User])
+	@Query((returns) => [Friend])
 	@UseGuards(AuthGuard)
 	async myFriendList(
 		@Context() contextValue: ContextValueType,
+	): Promise<Friend[]> {
+		const userId = contextValue.user.id;
+		return this.friendshipService.getFriendList(userId);
+	}
+
+	@Query((returns) => [User])
+	@UseGuards(AuthGuard)
+	async friendSuggestions(
+		@Context() contextValue: ContextValueType,
 	): Promise<User[]> {
-		return this.friendshipService.getFriendList(contextValue.user.id);
+		return this.friendshipService.getSuggestions(contextValue.user.id);
+	}
+
+	@Query((returns) => [Friendship])
+	@UseGuards(AuthGuard)
+	async myFriendRequests(
+		@Context() contextValue: ContextValueType,
+	): Promise<Friendship[]> {
+		return this.friendshipService.getFriendRequests(contextValue.user.id);
 	}
 
 	@Mutation((returns) => Friendship)
 	@UseGuards(AuthGuard)
 	async sendFriendRequest(
 		@Context() contextValue: ContextValueType,
-		@Args('requesteeId') requesteeId: number,
+		@Args('requesteeId', { type: () => Int }) requesteeId: number,
 	): Promise<Friendship> {
+		// TODO: can't send friend request to oneself
 		const friendShip = await this.friendshipService.createFriendship({
 			requesterId: contextValue.user.id,
 			requesteeId,
@@ -76,7 +99,7 @@ export class FriendshipResolver {
 	@UseGuards(AuthGuard)
 	async deleteFriendship(
 		@Context() contextValue: ContextValueType,
-		@Args('friendshipId') friendshipId: number,
+		@Args('friendshipId', { type: () => Int }) friendshipId: number,
 	): Promise<boolean> {
 		await this.friendshipService.deleteFriendship(
 			friendshipId,

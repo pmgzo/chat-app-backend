@@ -1,4 +1,4 @@
-import { Friendship, User } from '@prisma/client';
+import { Friendship, Prisma, User } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
 
@@ -77,17 +77,51 @@ export class FriendshipService {
 		});
 	}
 
-	async getFriendList(userId: number): Promise<User[]> {
+	async getFriendList(
+		userId: number,
+	): Promise<Prisma.FriendGetPayload<{ include: { friend: true } }>[]> {
+		return this.prismaService.friend.findMany({
+			where: {
+				friendId: { not: userId },
+				friendship: {
+					peer: { some: { friendId: userId } },
+					pending: false,
+				},
+			},
+			include: {
+				friend: true,
+			},
+		});
+	}
+
+	async getSuggestions(userId: number): Promise<User[]> {
 		return this.prismaService.user.findMany({
 			where: {
 				NOT: { id: userId },
 				friends: {
-					some: {
+					every: {
 						friendship: {
-							peer: { some: { friendId: userId } },
+							peer: { every: { friendId: { not: userId } } },
 						},
 					},
 				},
+			},
+			// order most recent ones
+			orderBy: [{ createdAt: 'desc' }],
+		});
+	}
+
+	async getFriendRequests(
+		userId: number,
+	): Promise<Prisma.FriendshipGetPayload<{ include: { requester: true } }>[]> {
+		return this.prismaService.friendship.findMany({
+			where: {
+				requesterId: { not: userId },
+				peer: { some: { friendId: userId } },
+				pending: true,
+			},
+			include: {
+				requester: true,
 			},
 		});
 	}
