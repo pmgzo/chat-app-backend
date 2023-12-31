@@ -1,4 +1,5 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { User } from './user.model';
 
 @ObjectType()
 export class Friend {
@@ -7,20 +8,29 @@ export class Friend {
 
 	@Field((type) => Int)
 	friendId: number;
+
+	@Field((type) => User)
+	friend?: User;
+
+	@Field((type) => Int)
+	friendshipId: number;
 }
 
 @ObjectType()
 export class Friendship {
-	@Field((type) => Int)
+	@Field((type) => Int, { nullable: true })
 	id: number;
 
-	@Field((type) => Int)
+	@Field((type) => Int, { nullable: true })
 	requesterId: number;
 
-	@Field((type) => [Friend])
-	peer: Friend[];
+	@Field((type) => User, { nullable: true })
+	requester: User;
 
-	@Field((type) => Boolean)
+	@Field((type) => [Friend], { nullable: true })
+	peer?: Friend[];
+
+	@Field((type) => Boolean, { nullable: true })
 	pending: boolean;
 }
 
