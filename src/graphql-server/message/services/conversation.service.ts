@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Conversation } from '@prisma/client';
+import { Conversation, User } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
 
 @Injectable()
@@ -40,5 +40,21 @@ export class ConversationService {
 				},
 			},
 		});
+	}
+
+	async getPeerFromConversation(conversationId: number, userId: number): Promise<User | undefined> {
+		return this.prismaService.user.findFirst({
+			where: {
+				id: { not: userId },
+				friends: {
+					some: { friendship: {
+						peer: { some: { friendId: userId }},
+						conversation: {
+							id: conversationId
+						}
+					}}
+				}
+			}
+		})
 	}
 }
