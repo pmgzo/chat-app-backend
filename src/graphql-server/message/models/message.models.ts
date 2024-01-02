@@ -1,4 +1,5 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
+import { User } from '../../user/models/user.model';
 
 @ObjectType()
 export class Message {
@@ -34,6 +35,9 @@ export class Conversation {
 
 	@Field((type) => Int)
 	count: number;
+
+	@Field((type) => User)
+	peer?: User;
 }
 
 export enum MessageSubscription {
