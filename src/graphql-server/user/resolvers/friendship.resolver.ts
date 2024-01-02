@@ -3,7 +3,9 @@ import {
 	Context,
 	Int,
 	Mutation,
+	Parent,
 	Query,
+	ResolveField,
 	Resolver,
 	Subscription,
 } from '@nestjs/graphql';
@@ -106,6 +108,11 @@ export class FriendshipResolver {
 			contextValue.user.id,
 		);
 		return true;
+	}
+
+	@ResolveField((returns) => User)
+	async peer(@Parent() friendship: Friendship, @Context() ctx: ContextValueType): Promise<User> {
+		return this.friendshipService.getPeerFromFriendship(friendship.id, ctx.user.id);
 	}
 
 	@Subscription((returns) => Friendship, {

@@ -14,6 +14,9 @@ import { MessageService } from '../services/message.service';
 import { PaginationMessagesArgs } from '../dto/message.input';
 import { User } from '../../user/models/user.model';
 import { ContextValueType } from '../../configs/context';
+import { UseGuards } from '@nestjs/common';
+import { AuthGuard } from '../../auth/auth.guards';
+import { Friendship } from '../../user/models/friendship.model';
 
 @Resolver((of) => Conversation)
 export class ConversationResolver {
@@ -23,6 +26,7 @@ export class ConversationResolver {
 	) {}
 
 	@Query((returns) => Conversation)
+	@UseGuards(AuthGuard)
 	async conversation(
 		@Context() ctx,
 		@Args('id', { type: () => Int }) id: number,
@@ -31,7 +35,25 @@ export class ConversationResolver {
 		return this.convService.getConversation(id, ctx.user.id);
 	}
 
+	@Query((returns) => [Conversation])
+	@UseGuards(AuthGuard)
+	async conversations(@Context() ctx: ContextValueType): Promise<Conversation[]> {
+		// @ts-ignore (can't recognize field resolvers)
+		// TODO: maybe should add the field with the person's name ?
+		return this.convService.getUserConversations(ctx.user.id);
+	}
+
+	@Query((returns) => [Friendship])
+	@UseGuards(AuthGuard)
+	async uncreatedConversations(@Context() ctx: ContextValueType): Promise<Friendship[]> {		
+		// @ts-ignore (can't recognize field resolvers)
+		// TODO: maybe should add the field with the person's name ?
+		// return this.convService.uncreatedConversations(ctx.user.id);
+		return this.convService.uncreatedConversations(ctx.user.id);
+	}
+
 	@Mutation((returns) => Conversation)
+	@UseGuards(AuthGuard)
 	async createConversation(
 		@Context() ctx,
 		@Args('friendshipId', { type: () => Int }) friendshipId: number,
@@ -57,6 +79,6 @@ export class ConversationResolver {
 
 	@ResolveField((returns) => User)
 	async peer(@Parent() conversation: Conversation, @Context() ctx: ContextValueType): Promise<User> {
-		return this.convService.getPeerFromConversation(conversation.id, ctx.user.id)
+		return this.convService.getPeerFromConversation(conversation.id, ctx.user.id);
 	}
 }

@@ -27,8 +27,8 @@ export class Friendship {
 	@Field((type) => User, { nullable: true })
 	requester: User;
 
-	@Field((type) => [Friend], { nullable: true })
-	peer?: Friend[];
+	@Field((type) => User, { nullable: true })
+	peer?: User;
 
 	@Field((type) => Boolean, { nullable: true })
 	pending: boolean;
