@@ -12,6 +12,8 @@ import {
 import { ConversationService } from '../services/conversation.service';
 import { MessageService } from '../services/message.service';
 import { PaginationMessagesArgs } from '../dto/message.input';
+import { User } from '../../user/models/user.model';
+import { ContextValueType } from '../../configs/context';
 
 @Resolver((of) => Conversation)
 export class ConversationResolver {
@@ -40,7 +42,7 @@ export class ConversationResolver {
 
 	@ResolveField((returns) => [Message])
 	async messages(
-		@Parent() conversation,
+		@Parent() conversation: Conversation,
 		@Args({ nullable: true })
 		args: PaginationMessagesArgs | null,
 	): Promise<Message[]> {
@@ -49,7 +51,12 @@ export class ConversationResolver {
 	}
 
 	@ResolveField((returns) => Int)
-	async count(@Parent() conversation): Promise<number> {
+	async count(@Parent() conversation: Conversation): Promise<number> {
 		return this.messageService.countMessages(conversation.id);
+	}
+
+	@ResolveField((returns) => User)
+	async peer(@Parent() conversation: Conversation, @Context() ctx: ContextValueType): Promise<User> {
+		return this.convService.getPeerFromConversation(conversation.id, ctx.user.id)
 	}
 }
