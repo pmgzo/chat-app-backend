@@ -5,12 +5,12 @@ import {
 	Args,
 	Context,
 	Subscription,
+	Int,
 } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { Message, MessageSubscription } from '../models/message.models';
 import {
 	MessageInput,
-	MessageSubscriptionArgs,
 	MessagesArgs,
 } from '../dto/message.input';
 import { AuthGuard } from '../../auth/auth.guards';
@@ -85,18 +85,19 @@ export class MessageResolver {
 
 	@Subscription((returns) => Message, {
 		filter: (payload, variables, ctx) => {
-			const { conversationId: givenConvId, receiverId: givenReceiverId } =
-				variables;
+			const { conversationId: givenConvId } = variables;
+			const givenReceiverId: number = ctx.req.extra.user.id;
+
 			const { conversationId, receiverId } = payload.messageSent;
 			return conversationId === givenConvId && receiverId === givenReceiverId;
 		},
 	})
 	async messageSent(
 		@Context() ctx,
-		@Args() args: MessageSubscriptionArgs,
+		@Args('conversationId', {type: () => Int }) conversationId: number,
 	): Promise<AsyncIterator<IteratorResult<Message>>> {
 		return this.permissionService
-			.haveAccessToThisConv(args.conversationId, ctx.req.extra.user.id)
+			.haveAccessToThisConv(conversationId, ctx.req.extra.user.id)
 			.then((result) => {
 				if (!result) {
 					throw new GraphQLError("Subscribe to other's events is forbidden", {
