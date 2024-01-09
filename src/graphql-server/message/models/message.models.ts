@@ -31,10 +31,10 @@ export class Conversation {
 	friendshipId: number;
 
 	@Field((type) => [Message])
-	messages: Message[];
+	messages?: Message[];
 
 	@Field((type) => Int)
-	count: number;
+	count?: number;
 
 	@Field((type) => User)
 	peer?: User;

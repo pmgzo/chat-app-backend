@@ -135,8 +135,8 @@ describe('Graphql Subscription tests', () => {
 			// subscribe to receiving message from this conv
 			const subscription = client.iterate({
 				query:
-					'subscription MessageSent($conversationId: Int!, $receiverId: Int!){ messageSent(conversationId: $conversationId, receiverId: $receiverId) { id, conversationId, text } }',
-				variables: { conversationId: conversation.id, receiverId: mamadou.id },
+					'subscription MessageSent($conversationId: Int!){ messageSent(conversationId: $conversationId) { id, conversationId, text } }',
+				variables: { conversationId: conversation.id },
 			});
 
 			// wait enough to let the client subscribe before the sending message
@@ -235,10 +235,9 @@ describe('Graphql Subscription tests', () => {
 
 											const subscription = client.iterate({
 												query:
-													'subscription MessageSent($conversationId: Int!, $receiverId: Int!){ messageSent(conversationId: $conversationId, receiverId: $receiverId) { id, conversationId, text } }',
+													'subscription MessageSent($conversationId: Int!){ messageSent(conversationId: $conversationId) { id, conversationId, text } }',
 												variables: {
-													conversationId: conversation.id,
-													receiverId: kathy.id,
+													conversationId: conversation.id
 												},
 											});
 										});
