@@ -78,10 +78,15 @@ describe('Friendship Resolver', () => {
 
 		// friendList of Kathy
 		let friendList = await friendshipResolver.myFriendList({ user: kathy });
-		expect(friendList).toEqual(expect.arrayContaining([mamadou]));
+		
+		expect(friendList[0].friend.id).toEqual(mamadou.id)
+		expect(friendList).toHaveLength(1);
+
 		// friendList of Mamadou
 		friendList = await friendshipResolver.myFriendList({ user: mamadou });
-		expect(friendList).toEqual(expect.arrayContaining([kathy]));
+		expect(friendList[0].friend.id).toEqual(kathy.id)
+		expect(friendList).toHaveLength(1);
+		
 		// friendList of Tom
 		friendList = await friendshipResolver.myFriendList({ user: tom });
 		expect(friendList).toHaveLength(0);
