@@ -21,7 +21,8 @@
 		"test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
 		"test:migrate:db": "dotenv -e .env.test -- npx prisma db push",
 		"test:clean:db": "dotenv -e .env.test -- npx prisma migrate reset",
-		"test:e2e": "dotenv -e .env.test --  jest -i --config ./test/jest-e2e.json"
+		"test:e2e": "dotenv -e .env.test --  jest -i --config ./test/jest-e2e.json",
+		"prisma:studio": "dotenv -e .env.dev -- npx prisma studio"
 	},
 	"dependencies": {
 		"@apollo/server": "^4.9.5",
