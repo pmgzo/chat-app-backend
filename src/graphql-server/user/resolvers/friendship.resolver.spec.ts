@@ -6,6 +6,9 @@ import { UserService } from '../services/user.service';
 import { User } from '@prisma/client';
 import { FriendshipResolver } from './friendship.resolver';
 import { UserModule } from '../user.module';
+import { ConversationResolver } from '../../message/resolvers/conversation.resolver';
+import { MessageResolver } from '../../message/resolvers/message.resolver';
+import { MessageModule } from '../../message/message.module';
 
 describe('Friendship Resolver', () => {
 	let friendshipResolver: FriendshipResolver;
@@ -30,7 +33,7 @@ describe('Friendship Resolver', () => {
 				AuthService,
 				PrismaService,
 			],
-			imports: [UserModule],
+			imports: [UserModule, MessageModule],
 		}).compile();
 
 		userService = testingModule.get<UserService>(UserService);
@@ -91,6 +94,35 @@ describe('Friendship Resolver', () => {
 		friendList = await friendshipResolver.myFriendList({ user: tom });
 		expect(friendList).toHaveLength(0);
 	});
+
+	it('delete friendship whith conversation and messages created (tesing delete on cascade)', async () => {
+		const friendshipReq = await friendshipResolver.sendFriendRequest(
+			{ user: kathy },
+			tom.id,
+		);
+
+		expect(friendshipReq.requesterId).toEqual(kathy.id);
+
+		// reject
+		await friendshipResolver.respondToFriendRequest(
+			{ user: tom },
+			{ friendRequestId: friendshipReq.id, accept: true },
+		);
+
+		const conversationResolver = testingModule.get<ConversationResolver>(ConversationResolver);
+		const messageResolver = testingModule.get<MessageResolver>(MessageResolver);
+
+		const conv = await conversationResolver.createConversation({ user: kathy }, friendshipReq.id);
+		await messageResolver.sendMessage({ user: kathy }, { text: "Hi", receiverId: tom.id, conversationId: conv.id});
+
+		await friendshipResolver.deleteFriendship({user: tom}, friendshipReq.id)
+
+		// friendList of Kathy
+		let friendList = await friendshipResolver.myFriendList({ user: tom });
+		
+		expect(friendList).toHaveLength(0);
+	});
+
 
 	afterAll(async () => {
 		await prismaService.friendship.deleteMany({});

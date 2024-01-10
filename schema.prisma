@@ -14,7 +14,7 @@ model User {
   salt      String   @unique
   password  String
 
-  friendships Friendship[]
+  createdFriendships Friendship[]
   friends     Friend[]
   writtenMessages  Message[]    @relation("WrittenMessages")
   receivedMessages Message[]    @relation("ReceivedMessages")
@@ -43,7 +43,7 @@ model Friendship {
 
 model Conversation {
   id           Int        @id @default(autoincrement())
-  friendship   Friendship @relation(fields: [friendshipId], references: [id])
+  friendship   Friendship @relation(fields: [friendshipId], references: [id], onDelete: Cascade)
   friendshipId Int        @unique
 
   messages Message[]
@@ -54,7 +54,7 @@ model Message {
   createdAt DateTime @default(now())
   text      String
 
-  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   conversationId Int
 
   senderId   Int
