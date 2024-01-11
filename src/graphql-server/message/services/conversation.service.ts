@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Conversation, User, Friendship } from '@prisma/client';
+import { Conversation, User, Friendship, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
 
 @Injectable()
@@ -42,13 +42,18 @@ export class ConversationService {
 		});
 	}
 
-	async getUserConversations(userId: number): Promise<Conversation[]> {
+	async getUserStartedConversations(userId: number): Promise<Conversation[]> {
 		return this.prismaService.conversation.findMany({
 			where: {
 				friendship: {
 					peer: { some: { friendId: userId } },
 				},
 			},
+			include: {
+				messages: true
+			}
+		}).then((conversations) => {
+			return conversations.filter(conversation => conversation.messages.length)
 		});
 	}
 
@@ -75,6 +80,21 @@ export class ConversationService {
 				pending: false,
 				conversation: null
 			}
+		})
+	}
+
+	async unstartedUserConversations(userId: number): Promise<Prisma.ConversationGetPayload<{include: {messages: true}}>[]> {
+		return this.prismaService.conversation.findMany({
+			where: {
+				friendship: {
+					peer: { some: { friendId: userId } },
+				},
+			},
+			include: {
+				messages: true
+			}
+		}).then((conversations) => {
+			return conversations.filter((conversation) => conversation.messages.length === 0)
 		})
 	}
 }
