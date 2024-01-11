@@ -1,3 +1,5 @@
+# Chat app backend
+
 ## Description
 
 This project uses [Nest](https://github.com/nestjs/nest) framework.
