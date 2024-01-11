@@ -31,24 +31,24 @@ export class ConversationResolver {
 		@Context() ctx,
 		@Args('id', { type: () => Int }) id: number,
 	): Promise<Conversation> {
-		// @ts-ignore (can't recognize field resolvers)
 		return this.convService.getConversation(id, ctx.user.id);
 	}
 
 	@Query((returns) => [Conversation])
 	@UseGuards(AuthGuard)
 	async conversations(@Context() ctx: ContextValueType): Promise<Conversation[]> {
-		// @ts-ignore (can't recognize field resolvers)
-		// TODO: maybe should add the field with the person's name ?
-		return this.convService.getUserConversations(ctx.user.id);
+		return this.convService.getUserStartedConversations(ctx.user.id);
+	}
+	
+	@Query((returns) => [Conversation])
+	@UseGuards(AuthGuard)
+	async unstartedConversations(@Context() ctx: ContextValueType): Promise<Conversation[]> {
+		return this.convService.unstartedUserConversations(ctx.user.id);
 	}
 
 	@Query((returns) => [Friendship])
 	@UseGuards(AuthGuard)
 	async uncreatedConversations(@Context() ctx: ContextValueType): Promise<Friendship[]> {		
-		// @ts-ignore (can't recognize field resolvers)
-		// TODO: maybe should add the field with the person's name ?
-		// return this.convService.uncreatedConversations(ctx.user.id);
 		return this.convService.uncreatedConversations(ctx.user.id);
 	}
 
@@ -58,7 +58,6 @@ export class ConversationResolver {
 		@Context() ctx,
 		@Args('friendshipId', { type: () => Int }) friendshipId: number,
 	): Promise<Conversation> {
-		// @ts-ignore (can't recognize field resolvers)
 		return this.convService.createConversation(friendshipId, ctx.user.id);
 	}
 
