@@ -25,7 +25,7 @@ export class Friendship {
 	requesterId: number;
 
 	@Field((type) => User, { nullable: true })
-	requester: User;
+	requester?: User;
 
 	@Field((type) => User, { nullable: true })
 	peer?: User;

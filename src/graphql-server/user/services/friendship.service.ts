@@ -111,6 +111,15 @@ export class FriendshipService {
 		});
 	}
 
+	async unrespondedFriendRequest(userId: number): Promise<Friendship[]> {
+		return this.prismaService.friendship.findMany({
+			where: {
+				requesterId: userId,
+				pending: true
+			}
+		})
+	}
+
 	async getFriendRequests(
 		userId: number,
 	): Promise<Prisma.FriendshipGetPayload<{ include: { requester: true } }>[]> {

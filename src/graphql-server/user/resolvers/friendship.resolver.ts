@@ -55,6 +55,14 @@ export class FriendshipResolver {
 		return this.friendshipService.getFriendRequests(contextValue.user.id);
 	}
 
+	@Query((returns) => [Friendship])
+	@UseGuards(AuthGuard)
+	async myUnrespondedFriendRequests(
+		@Context() contextValue: ContextValueType,
+	): Promise<Friendship[]> {
+		return this.friendshipService.unrespondedFriendRequest(contextValue.user.id);
+	}
+
 	@Mutation((returns) => Friendship)
 	@UseGuards(AuthGuard)
 	async sendFriendRequest(
