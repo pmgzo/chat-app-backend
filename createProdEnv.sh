@@ -1,5 +1,5 @@
 # setup services for prod env
-docker compose up --env-file ".env" -p chat-app-backedn-prod -d
+docker compose --env-file ".env" -p chat-app-backend-prod up -d
 
 # push prisma schema to databases
 npx dotenv -e .env -- npx prisma db push
