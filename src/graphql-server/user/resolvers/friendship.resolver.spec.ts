@@ -81,15 +81,15 @@ describe('Friendship Resolver', () => {
 
 		// friendList of Kathy
 		let friendList = await friendshipResolver.myFriendList({ user: kathy });
-		
-		expect(friendList[0].friend.id).toEqual(mamadou.id)
+
+		expect(friendList[0].friend.id).toEqual(mamadou.id);
 		expect(friendList).toHaveLength(1);
 
 		// friendList of Mamadou
 		friendList = await friendshipResolver.myFriendList({ user: mamadou });
-		expect(friendList[0].friend.id).toEqual(kathy.id)
+		expect(friendList[0].friend.id).toEqual(kathy.id);
 		expect(friendList).toHaveLength(1);
-		
+
 		// friendList of Tom
 		friendList = await friendshipResolver.myFriendList({ user: tom });
 		expect(friendList).toHaveLength(0);
@@ -109,20 +109,26 @@ describe('Friendship Resolver', () => {
 			{ friendRequestId: friendshipReq.id, accept: true },
 		);
 
-		const conversationResolver = testingModule.get<ConversationResolver>(ConversationResolver);
+		const conversationResolver =
+			testingModule.get<ConversationResolver>(ConversationResolver);
 		const messageResolver = testingModule.get<MessageResolver>(MessageResolver);
 
-		const conv = await conversationResolver.createConversation({ user: kathy }, friendshipReq.id);
-		await messageResolver.sendMessage({ user: kathy }, { text: "Hi", receiverId: tom.id, conversationId: conv.id});
+		const conv = await conversationResolver.createConversation(
+			{ user: kathy },
+			friendshipReq.id,
+		);
+		await messageResolver.sendMessage(
+			{ user: kathy },
+			{ text: 'Hi', receiverId: tom.id, conversationId: conv.id },
+		);
 
-		await friendshipResolver.deleteFriendship({user: tom}, friendshipReq.id)
+		await friendshipResolver.deleteFriendship({ user: tom }, friendshipReq.id);
 
 		// friendList of Kathy
 		let friendList = await friendshipResolver.myFriendList({ user: tom });
-		
+
 		expect(friendList).toHaveLength(0);
 	});
-
 
 	afterAll(async () => {
 		await prismaService.friendship.deleteMany({});

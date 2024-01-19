@@ -60,7 +60,9 @@ export class FriendshipResolver {
 	async myUnrespondedFriendRequests(
 		@Context() contextValue: ContextValueType,
 	): Promise<Friendship[]> {
-		return this.friendshipService.unrespondedFriendRequest(contextValue.user.id);
+		return this.friendshipService.unrespondedFriendRequest(
+			contextValue.user.id,
+		);
 	}
 
 	@Mutation((returns) => Friendship)
@@ -119,8 +121,14 @@ export class FriendshipResolver {
 	}
 
 	@ResolveField((returns) => User)
-	async peer(@Parent() friendship: Friendship, @Context() ctx: ContextValueType): Promise<User> {
-		return this.friendshipService.getPeerFromFriendship(friendship.id, ctx.user.id);
+	async peer(
+		@Parent() friendship: Friendship,
+		@Context() ctx: ContextValueType,
+	): Promise<User> {
+		return this.friendshipService.getPeerFromFriendship(
+			friendship.id,
+			ctx.user.id,
+		);
 	}
 
 	@Subscription((returns) => Friendship, {

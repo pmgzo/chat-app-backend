@@ -24,7 +24,7 @@ import { context, onConnect } from './configs/context';
 			sortSchema: true,
 			formatError,
 			context,
-			introspection: process.env.NODE_ENV !== 'production'
+			introspection: process.env.NODE_ENV !== 'production',
 		}),
 	],
 })

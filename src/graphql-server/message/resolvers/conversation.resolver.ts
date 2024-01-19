@@ -36,19 +36,25 @@ export class ConversationResolver {
 
 	@Query((returns) => [Conversation])
 	@UseGuards(AuthGuard)
-	async conversations(@Context() ctx: ContextValueType): Promise<Conversation[]> {
+	async conversations(
+		@Context() ctx: ContextValueType,
+	): Promise<Conversation[]> {
 		return this.convService.getUserStartedConversations(ctx.user.id);
 	}
-	
+
 	@Query((returns) => [Conversation])
 	@UseGuards(AuthGuard)
-	async unstartedConversations(@Context() ctx: ContextValueType): Promise<Conversation[]> {
+	async unstartedConversations(
+		@Context() ctx: ContextValueType,
+	): Promise<Conversation[]> {
 		return this.convService.unstartedUserConversations(ctx.user.id);
 	}
 
 	@Query((returns) => [Friendship])
 	@UseGuards(AuthGuard)
-	async uncreatedConversations(@Context() ctx: ContextValueType): Promise<Friendship[]> {		
+	async uncreatedConversations(
+		@Context() ctx: ContextValueType,
+	): Promise<Friendship[]> {
 		return this.convService.uncreatedConversations(ctx.user.id);
 	}
 
@@ -77,7 +83,13 @@ export class ConversationResolver {
 	}
 
 	@ResolveField((returns) => User)
-	async peer(@Parent() conversation: Conversation, @Context() ctx: ContextValueType): Promise<User> {
-		return this.convService.getPeerFromConversation(conversation.id, ctx.user.id);
+	async peer(
+		@Parent() conversation: Conversation,
+		@Context() ctx: ContextValueType,
+	): Promise<User> {
+		return this.convService.getPeerFromConversation(
+			conversation.id,
+			ctx.user.id,
+		);
 	}
 }

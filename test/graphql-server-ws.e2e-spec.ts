@@ -237,7 +237,7 @@ describe('Graphql Subscription tests', () => {
 												query:
 													'subscription MessageSent($conversationId: Int!){ messageSent(conversationId: $conversationId) { id, conversationId, text } }',
 												variables: {
-													conversationId: conversation.id
+													conversationId: conversation.id,
 												},
 											});
 										});

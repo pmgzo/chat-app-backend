@@ -43,34 +43,43 @@ export class ConversationService {
 	}
 
 	async getUserStartedConversations(userId: number): Promise<Conversation[]> {
-		return this.prismaService.conversation.findMany({
-			where: {
-				friendship: {
-					peer: { some: { friendId: userId } },
+		return this.prismaService.conversation
+			.findMany({
+				where: {
+					friendship: {
+						peer: { some: { friendId: userId } },
+					},
 				},
-			},
-			include: {
-				messages: true
-			}
-		}).then((conversations) => {
-			return conversations.filter(conversation => conversation.messages.length)
-		});
+				include: {
+					messages: true,
+				},
+			})
+			.then((conversations) => {
+				return conversations.filter(
+					(conversation) => conversation.messages.length,
+				);
+			});
 	}
 
-	async getPeerFromConversation(conversationId: number, userId: number): Promise<User | undefined> {
+	async getPeerFromConversation(
+		conversationId: number,
+		userId: number,
+	): Promise<User | undefined> {
 		return this.prismaService.user.findFirst({
 			where: {
 				id: { not: userId },
 				friends: {
-					some: { friendship: {
-						peer: { some: { friendId: userId }},
-						conversation: {
-							id: conversationId
-						}
-					}}
-				}
-			}
-		})
+					some: {
+						friendship: {
+							peer: { some: { friendId: userId } },
+							conversation: {
+								id: conversationId,
+							},
+						},
+					},
+				},
+			},
+		});
 	}
 
 	async uncreatedConversations(userId: number): Promise<Friendship[]> {
@@ -78,23 +87,29 @@ export class ConversationService {
 			where: {
 				peer: { some: { friendId: userId } },
 				pending: false,
-				conversation: null
-			}
-		})
+				conversation: null,
+			},
+		});
 	}
 
-	async unstartedUserConversations(userId: number): Promise<Prisma.ConversationGetPayload<{include: {messages: true}}>[]> {
-		return this.prismaService.conversation.findMany({
-			where: {
-				friendship: {
-					peer: { some: { friendId: userId } },
+	async unstartedUserConversations(
+		userId: number,
+	): Promise<Prisma.ConversationGetPayload<{ include: { messages: true } }>[]> {
+		return this.prismaService.conversation
+			.findMany({
+				where: {
+					friendship: {
+						peer: { some: { friendId: userId } },
+					},
 				},
-			},
-			include: {
-				messages: true
-			}
-		}).then((conversations) => {
-			return conversations.filter((conversation) => conversation.messages.length === 0)
-		})
+				include: {
+					messages: true,
+				},
+			})
+			.then((conversations) => {
+				return conversations.filter(
+					(conversation) => conversation.messages.length === 0,
+				);
+			});
 	}
 }

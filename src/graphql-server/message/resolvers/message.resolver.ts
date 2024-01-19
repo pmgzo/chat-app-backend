@@ -9,10 +9,7 @@ import {
 } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { Message, MessageSubscription } from '../models/message.models';
-import {
-	MessageInput,
-	MessagesArgs,
-} from '../dto/message.input';
+import { MessageInput, MessagesArgs } from '../dto/message.input';
 import { AuthGuard } from '../../auth/auth.guards';
 import { MessageService } from '../services/message.service';
 import { RedisPubSubEngineService } from '../../../redis/redis.service';
@@ -94,7 +91,7 @@ export class MessageResolver {
 	})
 	async messageSent(
 		@Context() ctx,
-		@Args('conversationId', {type: () => Int }) conversationId: number,
+		@Args('conversationId', { type: () => Int }) conversationId: number,
 	): Promise<AsyncIterator<IteratorResult<Message>>> {
 		return this.permissionService
 			.haveAccessToThisConv(conversationId, ctx.req.extra.user.id)

@@ -115,9 +115,9 @@ export class FriendshipService {
 		return this.prismaService.friendship.findMany({
 			where: {
 				requesterId: userId,
-				pending: true
-			}
-		})
+				pending: true,
+			},
+		});
 	}
 
 	async getFriendRequests(
@@ -135,17 +135,20 @@ export class FriendshipService {
 		});
 	}
 
-	async getPeerFromFriendship(friendshipId: number, userId: number): Promise<User|undefined> {
+	async getPeerFromFriendship(
+		friendshipId: number,
+		userId: number,
+	): Promise<User | undefined> {
 		return this.prismaService.user.findFirst({
-			where: { 
+			where: {
 				id: { not: userId },
 				friends: {
 					some: {
-						friendshipId
-					}
-				}
-			}
-		})
+						friendshipId,
+					},
+				},
+			},
+		});
 	}
 
 	// async areFriends(userId: number, friendId: number): Promise<boolean> {
