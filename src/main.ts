@@ -15,7 +15,7 @@ async function bootstrap() {
 	app.enableCors({
 		origin:
 			process.env.NODE_ENV === 'production'
-				? `http://${process.env.FRONTEND_URL}`
+				? `https://${process.env.FRONTEND_URL}`
 				: 'http://localhost:8080',
 	});
 	await app.listen(3000);
