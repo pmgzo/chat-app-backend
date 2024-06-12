@@ -4,27 +4,23 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 
 import { UserModule } from './user/user.module';
 import { MessageModule } from './message/message.module';
-import { formatError } from './configs/error-masking';
-import { context, onConnect } from './configs/context';
+import { PrismaModule } from '../prisma/prisma.module';
+import { AuthModule } from './auth/auth.module';
+import { GqlConfigService } from './graphql-config.service';
 
 @Module({
 	imports: [
 		UserModule,
 		MessageModule,
-		GraphQLModule.forRoot<ApolloDriverConfig>({
+		GraphQLModule.forRootAsync<ApolloDriverConfig>({
 			driver: ApolloDriver,
-			subscriptions: {
-				'graphql-ws': {
-					onConnect,
-					path: '/subscriptions',
-				},
-			},
-			playground: true,
-			autoSchemaFile: true,
-			sortSchema: true,
-			formatError,
-			context,
-			introspection: process.env.NODE_ENV !== 'production',
+			useClass: GqlConfigService,
+			imports: [
+				PrismaModule,
+				AuthModule.register({
+					tokenExpiresAfter: '1d',
+				}),
+			],
 		}),
 	],
 })
