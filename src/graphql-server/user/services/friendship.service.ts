@@ -1,10 +1,10 @@
 import { Friendship, Prisma, User } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class FriendshipService {
-	constructor(private prismaService: PrismaService) {}
+	constructor(@Inject(PrismaService) private prismaService: PrismaService) {}
 
 	async createFriendship({
 		requesterId,

@@ -13,6 +13,7 @@ interface ConnectionParamType extends Record<string, unknown> {
 }
 
 const authUser = async (token: string): Promise<User | null> => {
+	// TODO: solve the problem create with Prisma that create new instances
 	const prisma = new PrismaClient();
 	let user: User;
 

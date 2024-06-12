@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { UserExistArguments } from '../models/user.model';
@@ -10,7 +10,7 @@ const randomCharList =
 
 @Injectable()
 export class UserService {
-	constructor(private prismaService: PrismaService) {}
+	constructor(@Inject(PrismaService) private prismaService: PrismaService) {}
 
 	async findUser(name: string): Promise<User> {
 		return this.prismaService.user.findUniqueOrThrow({

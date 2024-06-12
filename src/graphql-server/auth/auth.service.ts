@@ -27,7 +27,7 @@ export const parseJwt = (token: string) => {
 export class AuthService {
 	constructor(
 		@Inject(AUTH_CONFIG) private options: AuthConfig,
-		private prisma: PrismaService,
+		@Inject(PrismaService) private prisma: PrismaService,
 	) {}
 
 	private parseJwt({ token }: { token: string }): JwtPayload {
