@@ -2,7 +2,7 @@ import { ApolloDriverConfig } from '@nestjs/apollo';
 import { Inject, Injectable } from '@nestjs/common';
 import { GqlOptionsFactory } from '@nestjs/graphql';
 import { formatError } from './configs/error-masking';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { User } from '@prisma/client';
 import { JwtPayload } from './auth/interfaces/auth.interfaces';
 import { parseJwt } from './auth/auth.service';
