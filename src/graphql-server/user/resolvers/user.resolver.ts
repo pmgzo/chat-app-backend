@@ -46,7 +46,10 @@ export class UserResolver {
 			credentials.password,
 		);
 
-		const token = this.authService.createJwt({ id: user.id, name: user.name });
+		const token = this.authService.createJwt({
+			id: user.id,
+			name: user.name,
+		});
 		return { token };
 	}
 
@@ -67,7 +70,10 @@ export class UserResolver {
 			});
 		}
 
-		const token = this.authService.createJwt({ id: user.id, name: user.name });
+		const token = this.authService.createJwt({
+			id: user.id,
+			name: user.name,
+		});
 
 		return { token };
 	}

@@ -211,7 +211,9 @@ describe('Graphql Subscription tests', () => {
 											client = createClient({
 												webSocketImpl: WebSocket,
 												url: 'ws://localhost:3000/subscriptions',
-												connectionParams: { token: `Bearer ${tokenObj.token}` },
+												connectionParams: {
+													token: `Bearer ${tokenObj.token}`,
+												},
 												lazy: false,
 											});
 

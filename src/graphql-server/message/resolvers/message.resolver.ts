@@ -98,7 +98,10 @@ export class MessageResolver {
 			.then((result) => {
 				if (!result) {
 					throw new GraphQLError("Subscribe to other's events is forbidden", {
-						extensions: { code: 'PERMISSIONS_ERROR', public: true },
+						extensions: {
+							code: 'PERMISSIONS_ERROR',
+							public: true,
+						},
 					});
 				}
 				return this.pubSub.asyncIterator(MessageSubscription.MessageSent);

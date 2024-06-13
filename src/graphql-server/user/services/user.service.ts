@@ -37,7 +37,9 @@ export class UserService {
 			data: {
 				name: name,
 				salt: salt,
-				password: await hash(password, { salt: Buffer.from(salt, 'utf8') }),
+				password: await hash(password, {
+					salt: Buffer.from(salt, 'utf8'),
+				}),
 			},
 		});
 	}

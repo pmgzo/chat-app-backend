@@ -75,7 +75,11 @@ describe('Message Resolver', () => {
 
 		const message1 = await messageResolver.sendMessage(
 			{ user: kathy },
-			{ text: 'hello', receiverId: tom.id, conversationId: conversation.id },
+			{
+				text: 'hello',
+				receiverId: tom.id,
+				conversationId: conversation.id,
+			},
 		);
 		const message2 = await messageResolver.sendMessage(
 			{ user: tom },

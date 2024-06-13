@@ -85,7 +85,9 @@ describe('GraphQLServer (e2e)', () => {
 			}
 			`,
 			operationName: 'Login',
-			variables: { credentials: { name: fakeUserName, password: 'password' } },
+			variables: {
+				credentials: { name: fakeUserName, password: 'password' },
+			},
 		};
 
 		return request(app.getHttpServer())
@@ -178,7 +180,11 @@ describe('GraphQLServer (e2e)', () => {
 			// send message
 			const message = await messageResolver.sendMessage(
 				{ user: kathy },
-				{ text: 'hello', receiverId: tom.id, conversationId: conversation.id },
+				{
+					text: 'hello',
+					receiverId: tom.id,
+					conversationId: conversation.id,
+				},
 			);
 
 			const tokenObj = await userResolver.login({
